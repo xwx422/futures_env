@@ -13,6 +13,10 @@ __pycache__/
 # macOS 系统文件
 .DS_Store
 
+# 大字体文件（使用 CDN 加载）
+static/fonts/NotoSansSC-*.ttf
+static/fonts/Inter-*.ttf
+
 # Git 备份目录
 .git_backup*/
 

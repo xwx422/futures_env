@@ -1,0 +1,184 @@
+# config.yaml
+# 只保留保证金≤1万的活跃品种（新手验证系统，1手起步）
+varieties:
+  # ==================== 黑色建材 ====================
+  螺纹钢:
+    sector: 黑色建材
+    code: RB
+    keywords: ["螺纹钢", "建筑钢材", "房地产", "基建", "粗钢"]
+    exchange: SHFE
+  热轧卷板:
+    sector: 黑色建材
+    code: HC
+    keywords: ["热卷", "热轧卷板", "制造业", "钢铁", "板材"]
+    exchange: SHFE
+  铁矿石:
+    sector: 黑色建材
+    code: I
+    keywords: ["铁矿石", "铁矿", "钢厂", "进口", "澳矿", "巴西"]
+    exchange: DCE
+
+  # ==================== 能源化工 ====================
+  甲醇:
+    sector: 能源化工
+    code: MA
+    keywords: ["甲醇", "化工", "能源", "MTO", "煤制"]
+    exchange: CZCE
+  PTA:
+    sector: 能源化工
+    code: TA
+    keywords: ["PTA", "对苯二甲酸", "纺织", "聚酯", "PX"]
+    exchange: CZCE
+  塑料:
+    sector: 能源化工
+    code: L
+    keywords: ["塑料", "聚乙烯", "PE", "化工", "包装"]
+    exchange: DCE
+  PVC:
+    sector: 能源化工
+    code: V
+    keywords: ["PVC", "聚氯乙烯", "化工", "塑料", "乙烯法", "电石法", "下游需求"]
+    exchange: DCE
+  纯碱:
+    sector: 能源化工
+    code: SA
+    keywords: ["纯碱", "光伏", "玻璃", "化工", "轻碱"]
+    exchange: CZCE
+  玻璃:
+    sector: 能源化工
+    code: FG
+    keywords: ["玻璃", "浮法", "地产", "竣工", "深加工"]
+    exchange: CZCE
+
+  # ==================== 农产品 ====================
+  豆粕:
+    sector: 农产品
+    code: M
+    keywords: ["豆粕", "大豆", "饲料", "养殖", "压榨", "美豆", "进口"]
+    exchange: DCE
+  豆油:
+    sector: 农产品
+    code: Y
+    keywords: ["豆油", "油脂", "大豆", "压榨", "食用油"]
+    exchange: DCE
+  玉米:
+    sector: 农产品
+    code: C
+    keywords: ["玉米", "粮食", "饲料", "进口", "种植"]
+    exchange: DCE
+  棉花:
+    sector: 农产品
+    code: CF
+    keywords: ["棉花", "郑棉", "纺织", "美棉", "种植"]
+    exchange: CZCE
+  白糖:
+    sector: 农产品
+    code: SR
+    keywords: ["白糖", "食糖", "甘蔗", "甜菜", "进口", "库存", "消费"]
+    exchange: CZCE
+
+# 商品期货分析规则（新手验证系统：固定1手）
+commodity_rules:
+  # ==================== 黑色建材 ====================
+  RB:
+    min_volatility: 0.015
+    typical_atr: 60
+    position_multiplier: 10   # 合约乘数（每点价值）
+    margin_rate: 0.10
+  HC:
+    min_volatility: 0.015
+    typical_atr: 65
+    position_multiplier: 10
+    margin_rate: 0.10
+  I:
+    min_volatility: 0.025
+    typical_atr: 15
+    position_multiplier: 100
+    margin_rate: 0.12
+
+  # ==================== 能源化工 ====================
+  MA:
+    min_volatility: 0.018
+    typical_atr: 50
+    position_multiplier: 10
+    margin_rate: 0.08
+  TA:
+    min_volatility: 0.018
+    typical_atr: 100
+    position_multiplier: 5
+    margin_rate: 0.08
+  L:
+    min_volatility: 0.018
+    typical_atr: 100
+    position_multiplier: 5
+    margin_rate: 0.09
+  V:
+    min_volatility: 0.018
+    typical_atr: 60
+    position_multiplier: 5
+    margin_rate: 0.07
+  SA:
+    min_volatility: 0.030
+    typical_atr: 70
+    position_multiplier: 20
+    margin_rate: 0.12
+  FG:
+    min_volatility: 0.025
+    typical_atr: 60
+    position_multiplier: 20
+    margin_rate: 0.12
+
+  # ==================== 农产品 ====================
+  M:
+    min_volatility: 0.015
+    typical_atr: 45
+    position_multiplier: 10
+    margin_rate: 0.08
+  Y:
+    min_volatility: 0.018
+    typical_atr: 120
+    position_multiplier: 10
+    margin_rate: 0.09
+  C:
+    min_volatility: 0.012
+    typical_atr: 30
+    position_multiplier: 10
+    margin_rate: 0.07
+  CF:
+    min_volatility: 0.018
+    typical_atr: 300
+    position_multiplier: 5
+    margin_rate: 0.10
+  SR:
+    min_volatility: 0.018
+    typical_atr: 80
+    position_multiplier: 10
+    margin_rate: 0.08
+
+# 风险控制参数（新手验证系统：1手，最多亏100）
+risk_control:
+  fixed_lots: 1                     # 固定1手
+  max_loss_per_lot: 100             # 每手最大可接受亏损（元）
+  take_profit_atr_multiple: 2.0     # 止盈ATR倍数
+  stop_loss_atr_multiple: 1.0       # 止损ATR倍数
+
+# 趋势预判引擎配置
+pre_trend_engine:
+  veto_rules:
+    rsi_overbought: 75        # RSI高于此值禁止追多
+    rsi_oversold: 25          # RSI低于此值禁止追空
+    deep_basis_threshold: -10 # 年化展期收益率低于此值(%)禁止做多
+    trend_exhaustion_adx: 50  # ADX高于此值+RSI极端=趋势衰竭
+  variety_overrides:
+    RB: {rsi_overbought: 78}  # 螺纹钢波动大，放宽阈值
+    I:  {deep_basis_threshold: -15}  # 铁矿石贴水常见，放宽阈值
+    SA: {rsi_overbought: 78}  # 纯碱波动大
+
+# 技术分析参数
+technical_params:
+  ma_short_period: 5
+  ma_long_period: 20
+  atr_period: 14
+  rsi_period: 14
+  bollinger_period: 20
+  bollinger_std: 2

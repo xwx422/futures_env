@@ -1,0 +1,35 @@
+[Unit]
+Description=AI期货分析系统
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/futures_ai
+Environment="PATH=/var/www/futures_ai/venv/bin"
+Environment="PYTHONPATH=/var/www/futures_ai"
+Environment="PYTHONUNBUFFERED=1"
+
+# 启动命令
+ExecStart=/var/www/futures_ai/venv/bin/gunicorn -c config/gunicorn.conf.py app:app
+
+# 重启策略
+Restart=always
+RestartSec=10
+
+# 停止策略
+TimeoutStopSec=30
+KillSignal=SIGTERM
+
+# 资源限制
+# LimitAS=1G
+# LimitNOFILE=65535
+
+# 日志输出到 systemd journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=futures-ai
+
+[Install]
+WantedBy=multi-user.target

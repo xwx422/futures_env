@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日志详情 #{{ log.id }} - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --bg-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-purple: #a371f7;
+            --neon-yellow: #d29922;
+            --border-color: #30363d;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .page-title { font-size: 1.75rem; }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { border-color: var(--neon-blue); color: var(--neon-blue); }
+
+        .detail-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-card h3 {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem 2rem;
+        }
+
+        .detail-item { display: flex; flex-direction: column; gap: 0.25rem; }
+        .detail-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-value { font-size: 1rem; color: var(--text-primary); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .status-success { background: rgba(63, 185, 80, 0.15); color: var(--neon-green); }
+        .status-running { background: rgba(88, 166, 255, 0.15); color: var(--neon-blue); }
+        .status-failed { background: rgba(248, 81, 73, 0.15); color: var(--neon-red); }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .stat-item {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .stat-item .stat-number { font-size: 2rem; font-weight: 700; line-height: 1; margin-bottom: 0.5rem; }
+        .stat-item .stat-label { font-size: 0.8rem; color: var(--text-muted); }
+        .stat-total .stat-number { color: var(--neon-blue); }
+        .stat-success .stat-number { color: var(--neon-green); }
+        .stat-failed .stat-number { color: var(--neon-red); }
+
+        /* 品种明细表格 */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background: var(--bg-elevated); color: var(--text-secondary); font-weight: 500; font-size: 0.85rem; }
+        tr:hover { background: var(--bg-hover); }
+
+        .price-up { color: var(--neon-red); }
+        .price-down { color: var(--neon-green); }
+        .price-flat { color: var(--text-muted); }
+
+        .direction-tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .direction-long { background: rgba(248, 81, 73, 0.15); color: var(--neon-red); }
+        .direction-short { background: rgba(63, 185, 80, 0.15); color: var(--neon-green); }
+        .direction-neutral { background: rgba(139, 148, 158, 0.15); color: var(--text-secondary); }
+
+        .confidence-bar {
+            width: 60px;
+            height: 6px;
+            background: var(--bg-elevated);
+            border-radius: 3px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.35rem;
+        }
+        .confidence-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .error-cell {
+            color: var(--neon-red);
+            font-size: 0.85rem;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .error-box {
+            background: rgba(248, 81, 73, 0.08);
+            border: 1px solid rgba(248, 81, 73, 0.2);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-top: 1rem;
+            color: var(--neon-red);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .message-box {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .empty-value { color: var(--text-muted); font-style: italic; }
+
+        @media (max-width: 768px) {
+            .detail-grid { grid-template-columns: 1fr; }
+            .stat-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, #a371f7, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⚙️ 管理后台</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="/xwx422" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                <span>←</span> 返回控制台
+            </a>
+            <a href="/dashboard" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                📊 数据展示
+            </a>
+            <a href="/logout" style="background: transparent; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#f85149'; this.style.color='#f85149';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                退出
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <a href="{{ url_for('admin_update_logs') }}" class="back-btn">← 返回日志列表</a>
+            <h1 class="page-title">📋 日志详情 #{{ log.id }}</h1>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="detail-card">
+            <h3>📝 基本信息</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">操作账号</span>
+                    <span class="detail-value">{{ log.username }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">操作时间</span>
+                    <span class="detail-value">{{ log.update_time }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">执行状态</span>
+                    <span class="detail-value">
+                        {% if log.status == 'success' %}
+                        <span class="status-badge status-success">✓ 成功</span>
+                        {% elif log.status == 'running' %}
+                        <span class="status-badge status-running">⟳ 运行中</span>
+                        {% else %}
+                        <span class="status-badge status-failed">✗ 失败</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">耗时</span>
+                    <span class="detail-value">
+                        {% if log.duration_seconds is not none %}
+                            {% if log.duration_seconds >= 60 %}
+                                {{ log.duration_seconds // 60 }}分{{ log.duration_seconds % 60 }}秒
+                            {% else %}
+                                {{ log.duration_seconds }}秒
+                            {% endif %}
+                        {% else %}
+                            <span class="empty-value">-</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 执行统计 -->
+        <div class="detail-card">
+            <h3>📊 执行统计</h3>
+            <div class="stat-grid">
+                <div class="stat-item stat-total">
+                    <div class="stat-number">{{ log.varieties_count or 0 }}</div>
+                    <div class="stat-label">更新品种数</div>
+                </div>
+                <div class="stat-item stat-success">
+                    <div class="stat-number">{{ log.success_count or 0 }}</div>
+                    <div class="stat-label">成功</div>
+                </div>
+                <div class="stat-item stat-failed">
+                    <div class="stat-number">{{ log.failed_count or 0 }}</div>
+                    <div class="stat-label">失败</div>
+                </div>
+            </div>
+            {% if log.message %}
+            <div class="message-box" style="margin-top: 1rem;">{{ log.message }}</div>
+            {% endif %}
+            {% if log.error_message %}
+            <div class="error-box">{{ log.error_message }}</div>
+            {% endif %}
+        </div>
+
+        <!-- 品种明细 -->
+        {% if details %}
+        <div class="detail-card">
+            <h3>📦 品种更新明细（{{ details|length }} 个）</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>品种代码</th>
+                        <th>品种名称</th>
+                        <th>状态</th>
+                        <th>最新价格</th>
+                        <th>涨跌幅</th>
+                        <th>AI方向</th>
+                        <th>信心度</th>
+                        <th>错误信息</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in details %}
+                    <tr>
+                        <td><strong>{{ d.variety_code }}</strong></td>
+                        <td>{{ d.variety_name or '-' }}</td>
+                        <td>
+                            {% if d.status == 'success' %}
+                            <span class="status-badge status-success">✓ 成功</span>
+                            {% else %}
+                            <span class="status-badge status-failed">✗ 失败</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if d.price and d.price > 0 %}
+                                {{ "%.1f"|format(d.price) }}
+                            {% else %}
+                                <span class="empty-value">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if d.price_change is not none and d.price_change != 0 %}
+                                {% if d.price_change > 0 %}
+                                <span class="price-up">+{{ "%.2f"|format(d.price_change) }}%</span>
+                                {% else %}
+                                <span class="price-down">{{ "%.2f"|format(d.price_change) }}%</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="price-flat">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if d.ai_direction %}
+                                {% if '多' in d.ai_direction or '做多' in d.ai_direction or '看多' in d.ai_direction %}
+                                <span class="direction-tag direction-long">{{ d.ai_direction }}</span>
+                                {% elif '空' in d.ai_direction or '做空' in d.ai_direction or '看空' in d.ai_direction %}
+                                <span class="direction-tag direction-short">{{ d.ai_direction }}</span>
+                                {% else %}
+                                <span class="direction-tag direction-neutral">{{ d.ai_direction }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="empty-value">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if d.ai_confidence is not none %}
+                                {% if d.ai_confidence is number %}
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" style="width: {{ d.ai_confidence }}%; background: {% if d.ai_confidence >= 70 %}var(--neon-green){% elif d.ai_confidence >= 50 %}var(--neon-yellow){% else %}var(--neon-red){% endif %};"></div>
+                                </div>
+                                {{ d.ai_confidence }}%
+                                {% elif d.ai_confidence == '高' %}
+                                <span class="direction-tag direction-long">高</span>
+                                {% elif d.ai_confidence == '低' %}
+                                <span class="direction-tag direction-short">低</span>
+                                {% else %}
+                                <span class="direction-tag direction-neutral">{{ d.ai_confidence }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="empty-value">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if d.error_message %}
+                            <span class="error-cell" title="{{ d.error_message }}">⚠️ {{ d.error_message }}</span>
+                            {% else %}
+                            <span class="empty-value">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="detail-card">
+            <h3>📦 品种更新明细</h3>
+            <p style="text-align: center; padding: 2rem; color: var(--text-muted);">该日志无品种级明细数据（旧版日志）</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ============================================
+         SEO 核心标签
+         ============================================ -->
+    <title>AI 期货分析助手 | 千亿 Token 算力打造的智能决策系统</title>
+    <meta name="description" content="消耗超 10 亿 Token 算力，融合 DeepSeek、千问等主流大模型深度打造。集趋势预判、否决机制、四维评分、趋势空间评估于一体，覆盖 14 个活跃期货品种。注册即用，每日免费分析。">
+    <meta name="keywords" content="AI 期货分析，千亿 Token 算力，趋势预判，否决机制，四维评分，趋势空间，多AI融合，DeepSeek 期货，期货辅助决策，信号评级，基差验证，ADX 趋势识别，ATR 动态风控，期货主力资金监控">
+    <meta name="author" content="马骑兔">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    <meta name="baiduspider" content="index, follow">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- ============================================
+         Open Graph / 社交媒体
+         ============================================ -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="AI 期货分析助手 | 智能期货辅助决策系统">
+    <meta property="og:description" content="消耗超 10 亿 Token 算力，融合 DeepSeek、千问等主流 AI 大模型深度打造。集趋势预判引擎、智能否决机制、四维评分、趋势空间评估于一体的期货决策系统。覆盖 14 个活跃品种，注册即用。">
+    <meta property="og:site_name" content="AI 期货分析助手">
+    <meta property="og:locale" content="zh_CN">
+    s
+    <!-- ============================================
+         网站图标
+         ============================================ -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    
+    <style>
+        /* ============ 基础重置 ============ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { text-decoration: none; color: inherit; transition: color 0.3s ease; }
+        ul { list-style: none; }
+        img { max-width: 100%; display: block; }
+        
+        /* ============ 变量 ============ */
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #22d3ee;
+            --bg-dark: #0a0a0a;
+            --bg-card: #121212;
+            --bg-elevated: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --success: #10b981;
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+            --gradient-glow: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+        }
+        
+        /* ============ 工具类 ============ */
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        .gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-padding { padding: 120px 0; }
+        .section-padding-compact { padding: 60px 0; }
+        @media (max-width: 768px) { 
+            .section-padding { padding: 80px 0; }
+            .section-padding-compact { padding: 40px 0; }
+        }
+        
+        /* ============ 背景效果 ============ */
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-glow {
+            position: absolute;
+            width: 600px; height: 600px;
+            background: var(--gradient-glow);
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+        }
+        .bg-glow-1 { top: -200px; left: -200px; }
+        .bg-glow-2 { bottom: -200px; right: -200px; background: radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 70%); }
+        .bg-grid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        
+        /* ============ 导航栏 ============ */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 72px;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .logo-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        .nav-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: var(--text-primary); }
+        .nav-cta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+        .mobile-toggle span {
+            width: 24px; height: 2px;
+            background: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .nav-menu { display: none; }
+            .mobile-toggle { display: flex; }
+        }
+        
+        /* ============ Hero 区域 ============ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 72px;
+            position: relative;
+        }
+        .hero .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .hero-content {
+            max-width: 580px;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+        }
+        .badge-dot {
+            width: 6px; height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 20px;
+        }
+        .hero-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 36px;
+        }
+        .hero-btns {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+        .hero-stats-right {
+            padding: 18px 32px;
+            border-top: none;
+            margin-bottom: 24px;
+            gap: 0;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 520px;
+            background: rgba(18, 18, 18, 0.6);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .hero-stats-right .stat-item {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .hero-stats-right .stat-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 28px;
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(255,255,255,0.15), transparent);
+        }
+        .hero-stats-right .stat-value {
+            font-size: 2rem;
+            letter-spacing: -0.02em;
+        }
+        .hero-stats-right .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            letter-spacing: 0.08em;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .hero-image {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* ============ Hero 区域右侧动画 - AI 智能分析主题 ============ */
+        .hero-animation-wrapper {
+            position: relative;
+            width: 560px;
+            height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: -30px;
+        }
+        
+        /* 背景网格 */
+        .chart-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+            background-size: 60px 50px;
+            z-index: 0;
+        }
+        
+        /* 主图表容器 */
+        .main-chart {
+            position: absolute;
+            width: 480px;
+            height: 280px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        /* K 线波动容器 */
+        .kline-wave-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+        }
+        
+        /* K 线柱组 */
+        .kline-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 100%;
+            padding: 0 10px;
+        }
+        
+        /* 单根 K 线柱 */
+        .kline-bar {
+            position: relative;
+            width: 6px;
+            margin: 0 2px;
+            animation: kline-wave 3s ease-in-out infinite;
+        }
+        
+        .kline-bar .wick {
+            position: absolute;
+            width: 2px;
+            background: #10b981;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 0;
+        }
+        
+        .kline-bar .body {
+            position: absolute;
+            width: 100%;
+            background: #10b981;
+            border-radius: 1px;
+            left: 0;
+        }
+        
+        .kline-bar.down .wick,
+        .kline-bar.down .body {
+            background: #ef4444;
+        }
+        
+        /* K 线波动动画 */
+        @keyframes kline-wave {
+            0%, 100% { transform: scaleY(1); }
+            25% { transform: scaleY(1.15); }
+            50% { transform: scaleY(0.85); }
+            75% { transform: scaleY(1.1); }
+        }
+        
+        /* 每根 K 线不同延迟 */
+        .kline-bar:nth-child(1) { animation-delay: 0s; }
+        .kline-bar:nth-child(2) { animation-delay: 0.1s; }
+        .kline-bar:nth-child(3) { animation-delay: 0.2s; }
+        .kline-bar:nth-child(4) { animation-delay: 0.3s; }
+        .kline-bar:nth-child(5) { animation-delay: 0.4s; }
+        .kline-bar:nth-child(6) { animation-delay: 0.5s; }
+        .kline-bar:nth-child(7) { animation-delay: 0.6s; }
+        .kline-bar:nth-child(8) { animation-delay: 0.7s; }
+        
+        /* 实时价格显示 */
+        .live-price {
+            position: absolute;
+            top: 20px;
+            right: 0;
+            text-align: right;
+            z-index: 20;
+        }
+        
+        .price-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            background: linear-gradient(135deg, #10b981, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: price-flash 2s ease-in-out infinite;
+        }
+        
+        .price-change {
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        
+        .price-change.up {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        
+        @keyframes price-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* AI 分析面板 */
+        .ai-analysis-panel {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            background: rgba(18, 18, 26, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 30;
+            width: 220px;
+            animation: panel-fade-in 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        @keyframes panel-fade-in {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .ai-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .ai-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        .ai-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+        
+        /* 技术指标 */
+        .indicator-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.75rem;
+        }
+        
+        .indicator-name {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .indicator-value {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-weight: 600;
+        }
+        
+        .indicator-value.positive { color: #10b981; }
+        .indicator-value.negative { color: #ef4444; }
+        .indicator-value.neutral { color: #f59e0b; }
+        
+        /* AI 信号 */
+        .ai-signal {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .signal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .signal-badge.buy {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+        
+        .signal-badge.sell {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        
+        .signal-confidence {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 2px;
+            animation: confidence-grow 1s ease-out forwards;
+            width: 0;
+        }
+        
+        @keyframes confidence-grow {
+            to { width: var(--confidence); }
+        }
+        
+        /* 操作提示 */
+        .action-tip {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: rgba(18, 18, 26, 0.95);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 10px;
+            padding: 10px 14px;
+            backdrop-filter: blur(10px);
+            z-index: 30;
+            animation: tip-fade-in 0.6s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+        
+        @keyframes tip-fade-in {
+            to { opacity: 1; }
+        }
+        
+        .action-tip-title {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .action-tip-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #10b981;
+        }
+        
+        /* 扫描线效果 */
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #06b6d4, transparent);
+            box-shadow: 0 0 20px #06b6d4;
+            animation: scan-vertical 4s linear infinite;
+            z-index: 25;
+            opacity: 0.6;
+        }
+        
+        @keyframes scan-vertical {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { top: 100%; opacity: 0; }
+        }
+        
+        /* 浮动数据标签 */
+        .floating-data {
+            position: absolute;
+            padding: 4px 10px;
+            background: rgba(18, 18, 26, 0.9);
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-weight: 600;
+            animation: data-float 3s ease-in-out infinite;
+            z-index: 15;
+        }
+        
+        .floating-data-1 {
+            top: 60px;
+            left: 40px;
+            color: #10b981;
+            animation-delay: 0s;
+        }
+        
+        .floating-data-2 {
+            top: 120px;
+            right: 60px;
+            color: #ef4444;
+            animation-delay: 1s;
+        }
+        
+        .floating-data-3 {
+            bottom: 80px;
+            left: 80px;
+            color: #f59e0b;
+            animation-delay: 2s;
+        }
+        
+        @keyframes data-float {
+            0%, 100% { transform: translateY(0); opacity: 0.8; }
+            50% { transform: translateY(-10px); opacity: 1; }
+        }
+        
+        /* 光效叠加 */
+        .glow-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+            z-index: 1;
+        }
+        
+        /* 脉冲光点 */
+        .pulse-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #06b6d4;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #06b6d4, 0 0 40px #06b6d4;
+            animation: pulse-expand 2s ease-in-out infinite;
+            z-index: 20;
+        }
+        
+        .pulse-dot-1 { top: 100px; left: 100px; }
+        .pulse-dot-2 { top: 150px; right: 120px; animation-delay: 0.5s; }
+        .pulse-dot-3 { bottom: 100px; left: 150px; animation-delay: 1s; }
+        
+        @keyframes pulse-expand {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.5); opacity: 1; }
+        }
+        
+        /* 趋势箭头 */
+        .trend-arrow {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: arrow-bounce 1.5s ease-in-out infinite;
+            z-index: 25;
+        }
+        
+        .trend-arrow-up {
+            top: 40px;
+            right: 40px;
+            color: #10b981;
+        }
+        
+        .trend-arrow-down {
+            bottom: 60px;
+            left: 40px;
+            color: #ef4444;
+            animation-delay: 0.75s;
+        }
+        
+        @keyframes arrow-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .hero-image-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            aspect-ratio: 16/10;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+        }
+        .hero-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hero-image-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%; height: 120%;
+            background: var(--gradient-glow);
+            filter: blur(100px);
+            z-index: -1;
+        }
+        @media (max-width: 1024px) {
+            .hero .container { grid-template-columns: 1fr; text-align: center; }
+            .hero-content { max-width: 100%; }
+            .hero-btns { justify-content: center; }
+            .hero-stats { justify-content: center; }
+            .hero-animation-wrapper { display: none; }
+        }
+        
+        /* ============ 特性卡片 ============ */
+        .features { position: relative; }
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+        .section-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--gradient-glow);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+        }
+        .feature-icon {
+            width: 48px; height: 48px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .feature-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .feature-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            position: relative;
+        }
+        @media (max-width: 1200px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .features-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ============ 优势板块 ============ */
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+        .advantage-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px;
+            transition: all 0.4s ease;
+        }
+        .advantage-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 24px 60px rgba(99, 102, 241, 0.15);
+        }
+        .advantage-icon {
+            width: 56px; height: 56px;
+            background: var(--gradient-primary);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+        }
+        .advantage-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .advantage-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+        .advantage-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .advantage-tag {
+            padding: 5px 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary-light);
+        }
+        @media (max-width: 1024px) {
+            .advantages-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .advantages-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* ============ 产品截图展示 ============ */
+        .product-showcase {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .product-image-wrapper {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        }
+        .product-image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .product-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%; height: 80%;
+            background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+        }
+        
+        /* ============ 合作联系 ============ */
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 48px;
+            align-items: start;
+        }
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .contact-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+        }
+        .contact-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .contact-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+        .contact-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .contact-tag {
+            padding: 5px 12px;
+            background: rgba(34, 211, 238, 0.1);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .contact-qr {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            position: sticky;
+            top: 100px;
+        }
+        .qr-icon {
+            width: 56px; height: 56px;
+            margin: 0 auto 16px;
+            background: rgba(34, 211, 238, 0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+        .contact-qr h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .contact-qr > p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        .qr-image {
+            width: 200px; height: 200px;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            background: white;
+            padding: 8px;
+        }
+        .qr-image img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+        .qr-tip {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        @media (max-width: 900px) {
+            .contact-content { grid-template-columns: 1fr; }
+            .contact-qr { position: static; }
+        }
+        
+        /* ============ Footer ============ */
+        .footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 48px 0 24px;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .footer-warning {
+            max-width: 700px;
+            padding: 12px 20px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            text-align: center;
+        }
+        .footer-warning strong {
+            color: #f59e0b;
+        }
+        .footer-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 24px;
+        }
+        .footer-copyright {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .footer-icp {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .footer-icp a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        .footer-icp a:hover {
+            color: var(--text-primary);
+        }
+        .footer-divider-inline {
+            margin: 0 8px;
+            color: var(--border);
+        }
+        @media (max-width: 768px) {
+            .footer-warning { max-width: 100%; }
+        }
+        
+        /* ============ 弹窗 ============ */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            width: 32px; height: 32px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .modal-close:hover {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+        }
+        .modal-icon {
+            width: 64px; height: 64px;
+            margin: 0 auto 20px;
+            background: rgba(34, 211, 238, 0.15);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        .modal h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .modal p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        .modal-qr {
+            width: 220px; height: 220px;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            background: white;
+            padding: 10px;
+        }
+        .modal-qr img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+        .modal-tip {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .modal-tip strong {
+            color: var(--primary-light);
+        }
+
+        /* ========== 行情推送侧边栏 ========== */
+        .market-push-sidebar {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+        }
+
+        .market-push-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 140px;
+            background: linear-gradient(180deg, #1a2744 0%, #0d1525 100%);
+            border: 1px solid var(--border-color);
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        .market-push-trigger span {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: 2px;
+        }
+
+        .market-push-trigger:hover {
+            background: linear-gradient(180deg, #2340c8 0%, #1a3285 100%);
+            box-shadow: -2px 0 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .market-push-trigger:hover span {
+            color: #fff;
+        }
+
+        .market-push-panel {
+            position: absolute;
+            right: 44px;
+            top: 50%;
+            transform: translateY(-50%) translateX(100%);
+            width: 200px;
+            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px 0 0 12px;
+            padding: 16px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .market-push-sidebar:hover .market-push-panel {
+            transform: translateY(-50%) translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .qr-module {
+            text-align: center;
+            padding: 12px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-module:last-child {
+            margin-bottom: 0;
+        }
+
+        .qr-module-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .qr-module-subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .qr-module img {
+            width: 110px;
+            height: 110px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            margin: 0 auto;
+        }
+
+        /* ============ 定价方案 ============ */
+        .pricing-section { background: var(--bg-card); }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 1024px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .pricing-grid { grid-template-columns: 1fr; } }
+        .pricing-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex; flex-direction: column;
+            transition: transform .25s, border-color .25s;
+            position: relative;
+        }
+        .pricing-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.16); }
+        .pricing-card.recommended {
+            border-color: rgba(99,102,241,0.45);
+            background: linear-gradient(180deg, rgba(99,102,241,0.08), var(--bg-elevated) 60%);
+        }
+        .pricing-badge {
+            position: absolute; top: -10px; right: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff; font-size: 0.7rem; font-weight: 700;
+            padding: 4px 10px; border-radius: 20px;
+        }
+        .pricing-title { font-size: 1.1rem; margin-bottom: 4px; }
+        .pricing-sub { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; }
+        .pricing-price { font-size: 2rem; font-weight: 700; margin-bottom: 16px; }
+        .pricing-price span { font-size: 0.875rem; color: var(--text-muted); font-weight: 500; }
+        .pricing-features { list-style: none; margin-bottom: 24px; flex: 1; }
+        .pricing-features li {
+            display: flex; align-items: flex-start; gap: 8px;
+            font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 10px;
+        }
+        .pricing-features li::before { content: '✓'; color: var(--success); font-weight: 700; }
+        .pricing-features .muted { color: var(--text-muted); text-decoration: line-through; }
+        .pricing-features .muted::before { content: '—'; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <!-- 行情推送侧边栏 -->
+    <div class="market-push-sidebar">
+        <div class="market-push-panel">
+            <div class="qr-module">
+                <div class="qr-module-title">行情推送</div>
+                <div class="qr-module-subtitle">行情/产品动态</div>
+                <img src="/static/images/gzh.jpg" alt="行情推送">
+            </div>
+        </div>
+        <div class="market-push-trigger">
+            <span>行情推送</span>
+        </div>
+    </div>
+    <!-- 背景效果 -->
+    <div class="bg-gradient">
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="bg-grid"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon">📊</div>
+                <span class="logo-text">AI期货分析助手</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="#features" class="nav-link">核心能力</a></li>
+                <li><a href="#advantages" class="nav-link">产品优势</a></li>
+                <li><a href="#contact" class="nav-link">商务合作</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a href="/register" class="btn btn-outline" style="margin-right: 8px;">免费注册</a>
+                <a href="/login" class="btn btn-primary">立即登录</a>
+                <div class="mobile-toggle" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    消耗 10亿+ Token 算力 · 多AI大模型融合打造
+                </div>
+                <h1>
+                    具备<strong class="gradient-text">趋势预判</strong>能力的<br>
+                    期货决策系统
+                </h1>
+                <p class="hero-desc">
+                    不止是"看方向"，而是回答交易员最核心的问题：<strong>现在能不能做？空间还有多大？风险在哪里？</strong>
+                    系统融合 DeepSeek、千问等主流 AI 大模型，累计消耗超 10 亿 Token 算力反复打磨，输出"趋势预判评分 + 否决机制 + 趋势空间评估 +
+                    四维评分"，将"看方向、定仓位、控风险"串成统一闭环。覆盖 14 个活跃期货品种，帮你从主观拍脑袋，升级为有证据的实战决策。
+                </p>
+                <div class="hero-search" style="margin-bottom: 28px;">
+                    <form action="/search" method="GET" style="display: flex; gap: 0; max-width: 480px;">
+                        <input type="text" name="q" placeholder="输入品种代码或名称，如 RB、螺纹钢…" required
+                            style="flex: 1; padding: 14px 20px; border-radius: 12px 0 0 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--text-primary); font-size: 1rem; outline: none;">
+                        <button type="submit" class="btn btn-primary" style="border-radius: 0 12px 12px 0;">AI 智能分析</button>
+                    </form>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">无需登录，免费体验 AI 分析预览</p>
+                </div>
+                <div class="hero-btns">
+                    <a href="/register" class="btn btn-primary">免费注册 →</a>
+                    <a href="/login" class="btn btn-outline">立即登录</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-stats hero-stats-right">
+                    <div class="stat-item">
+                        <div class="stat-value">10亿+</div>
+                        <div class="stat-label">Token 算力</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">14</div>
+                        <div class="stat-label">活跃品种</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">4维</div>
+                        <div class="stat-label">预判评分</div>
+                    </div>
+                </div>
+                <div class="hero-animation-wrapper">
+                    <!-- 背景网格 -->
+                    <div class="chart-grid"></div>
+                    <!-- 光效 -->
+                    <div class="glow-overlay"></div>
+                    
+                    <!-- 扫描线 -->
+                    <div class="scan-line"></div>
+                    
+                    <!-- 主图表 -->
+                    <div class="main-chart">
+                        <!-- 实时价格 -->
+                        <div class="live-price">
+                            <div class="price-value" id="livePrice">4,582.50</div>
+                            <div class="price-change up" id="priceChange">+2.35%</div>
+                        </div>
+                        
+                        <!-- K 线波动图 -->
+                        <div class="kline-wave-container">
+                            <div class="kline-bars">
+                                <div class="kline-bar" style="height: 65%;">
+                                    <div class="wick" style="height: 80%;"></div>
+                                    <div class="body" style="height: 45%; bottom: 0;"></div>
+                                </div>
+                                <div class="kline-bar down" style="height: 75%;">
+                                    <div class="wick" style="height: 90%;"></div>
+                                    <div class="body" style="height: 50%; bottom: 0;"></div>
+                                </div>
+                                <div class="kline-bar" style="height: 55%;">
+                                    <div class="wick" style="height: 70%;"></div>
+                                    <div class="body" style="height: 35%; bottom: 0;"></div>
+                                </div>
+                                <div class="kline-bar" style="height: 85%;">
+                                    <div class="wick" style="height: 95%;"></div>
+                                    <div class="body" style="height: 60%; bottom: 0;"></div>
+                                </div>
+                                <div class="kline-bar down" style="height: 60%;">
+                                    <div class="wick" style="height: 75%;"></div>
+                                    <div class="body" style="height: 40%; bottom: 0;"></div>
+                                </div>
+                                <div class="kline-bar" style="height: 90%;">
+                                    <div class="wick" style="height: 100%;"></div>
+                                    <div class="body" style="height: 65%; bottom: 0;"></div>
+                                </div>
+                                <div class="kline-bar" style="height: 70%;">
+                                    <div class="wick" style="height: 85%;"></div>
+                                    <div class="body" style="height: 50%; bottom: 0;"></div>
+                                </div>
+                                <div class="kline-bar down" style="height: 50%;">
+                                    <div class="wick" style="height: 65%;"></div>
+                                    <div class="body" style="height: 30%; bottom: 0;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 浮动数据标签 -->
+                        <div class="floating-data floating-data-1">MACD: 0.023</div>
+                        <div class="floating-data floating-data-2">RSI: 68.5</div>
+                        <div class="floating-data floating-data-3">ADX: 32.8</div>
+                        
+                        <!-- 脉冲光点 -->
+                        <div class="pulse-dot pulse-dot-1"></div>
+                        <div class="pulse-dot pulse-dot-2"></div>
+                        <div class="pulse-dot pulse-dot-3"></div>
+                        
+                        <!-- 趋势箭头 -->
+                        <div class="trend-arrow trend-arrow-up">↑</div>
+                        <div class="trend-arrow trend-arrow-down">↓</div>
+                    </div>
+                    
+                    <!-- AI 分析面板 -->
+                    <div class="ai-analysis-panel">
+                        <div class="ai-panel-header">
+                            <div class="ai-icon">🤖</div>
+                            <span class="ai-title">AI 智能分析</span>
+                        </div>
+                        
+                        <div class="indicator-row">
+                            <span class="indicator-name">MACD</span>
+                            <span class="indicator-value positive">金叉</span>
+                        </div>
+                        <div class="indicator-row">
+                            <span class="indicator-name">RSI(14)</span>
+                            <span class="indicator-value neutral">68.5</span>
+                        </div>
+                        <div class="indicator-row">
+                            <span class="indicator-name">ADX</span>
+                            <span class="indicator-value positive">32.8 强趋势</span>
+                        </div>
+                        <div class="indicator-row">
+                            <span class="indicator-name">布林带</span>
+                            <span class="indicator-value negative">触及上轨</span>
+                        </div>
+                        
+                        <div class="ai-signal">
+                            <div class="signal-badge buy">
+                                <span>📈 看多信号</span>
+                            </div>
+                            <div class="signal-confidence">
+                                置信度 87%
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" style="--confidence: 87%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作提示 -->
+                    <div class="action-tip">
+                        <div class="action-tip-title">💡 AI 操作建议</div>
+                        <div class="action-tip-text">逢低做多</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心能力 -->
+    <section id="features" class="section-padding features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">核心能力</span>
+                <h2 class="section-title">从"现状描述"升级到"趋势预判"</h2>
+                <p class="section-subtitle">不是所有指标看多就喊买，而是在多数指标刚转多、价格还没大涨时发现机会</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔮</div>
+                    <h3>趋势预判引擎</h3>
+                    <p>四维评分模型（趋势早期度 × 资金确认度 × 位置安全度 × 盈亏比），在趋势刚启动时捕捉信号，而非等所有指标确认后才喊方向。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚫</div>
+                    <h3>智能否决机制</h3>
+                    <p>RSI极端超买（>75）→ 拒绝做多；期限结构深贴水 → 拒绝做多；趋势衰竭（ADX>50+RSI极端）→ 拒绝入场。避免高位追涨、低位杀跌。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📏</div>
+                    <h3>趋势空间评估</h3>
+                    <p>计算当前趋势已消耗 ATR 倍数与剩余空间，告诉你"还能追吗"还是"已经走完了"。纯碱做空已走 2.5ATR(84%消耗) → 不建议再追。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>多AI大模型融合</h3>
+                    <p>开发过程中累计消耗超 10 亿 Token 算力，融合 DeepSeek、千问等主流大模型反复打磨，从行情分析到交易建议全链路 AI 驱动。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>趋势阶段识别</h3>
+                    <p>ADX + RSI 双确认，精准识别趋势生命周期：初期→成长→成熟→衰竭，配合入场时机 A/B/C/D 四级评估，把握最佳开仓窗口。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <h3>信号三档评级</h3>
+                    <p>布局 / 关注 / 等待 三档评级已联动预判引擎。预判否决 → 强制降为"等待"，预判高分 → 自动提升为"关注"，不再出现信号互斥。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚖️</div>
+                    <h3>动态风控体系</h3>
+                    <p>ATR 动态止损、盈亏比约束（≥2:1为佳）、每手最大亏损 100 元限制。帮助交易员把"先活下来"落到执行细节。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>全自动定时运行</h3>
+                    <p>Celery 异步任务驱动，早盘前、午盘前、每4小时自动执行全品种分析。Redis 缓存 + 价格实时刷新，数据始终保持最新。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 决策逻辑：三层分析链 -->
+    <section class="section-padding" style="position: relative; overflow: hidden;">
+        <!-- 背景装饰 -->
+        <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;">
+            <div style="position:absolute;top:10%;left:5%;width:300px;height:300px;background:radial-gradient(circle,rgba(99,102,241,0.08) 0%,transparent 70%);border-radius:50%;"></div>
+            <div style="position:absolute;bottom:20%;right:8%;width:350px;height:350px;background:radial-gradient(circle,rgba(34,211,238,0.06) 0%,transparent 70%);border-radius:50%;"></div>
+        </div>
+        <div class="container" style="position:relative;z-index:1;">
+            <div class="section-header">
+                <span class="section-tag">决策逻辑</span>
+                <h2 class="section-title">一个品种的三层分析链路</h2>
+                <p class="section-subtitle">系统不是看完所有指标说"涨"或"跌"，而是按 <strong>现状 → 趋势 → 预判</strong> 逐层过滤，确保每一条结论都有据可查</p>
+            </div>
+
+            <!-- 三层架构 -->
+            <div style="max-width:900px;margin:0 auto 60px;">
+                <!-- Layer 1: 现状分析 -->
+                <div style="display:flex;align-items:flex-start;gap:24px;margin-bottom:0;">
+                    <div style="flex-shrink:0;width:48px;height:48px;background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">📊</div>
+                    <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-left:3px solid #60a5fa;border-radius:12px;padding:24px;">
+                        <h3 style="font-size:1.1rem;font-weight:700;color:#93c5fd;margin-bottom:8px;">第一层 · 现状分析</h3>
+                        <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.8;margin-bottom:12px;">
+                            客观描述<strong>已经发生的事</strong>——价格、涨跌、技术指标、基差结构、期限价差、资金流向。
+                            MACD在什么位置，RSI是多少，布林带开口多大，持仓量怎么变。这些是<strong>不经过加工的原始数据与指标</strong>，告诉你"盘子现在是什么样"。
+                        </p>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">最新价</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">涨跌幅</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">RSI</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">MACD</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">KDJ</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">布林带</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">基差/期限结构</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">主力资金动向</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">量价分析</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">持仓量变化</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">跨期价差</span>
+                            <span style="padding:3px 10px;background:rgba(96,165,250,0.1);border-radius:6px;font-size:0.7rem;color:#93c5fd;">多周期K线</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 连接线 -->
+                <div style="display:flex;align-items:center;padding:8px 0 8px 48px;">
+                    <div style="width:2px;height:32px;background:linear-gradient(180deg,#60a5fa,#a78bfa);border-radius:1px;margin-right:12px;"></div>
+                    <span style="font-size:0.7rem;color:var(--text-muted);">数据清晰了，接下来判断方向</span>
+                </div>
+
+                <!-- Layer 2: 趋势分析 -->
+                <div style="display:flex;align-items:flex-start;gap:24px;margin-bottom:0;">
+                    <div style="flex-shrink:0;width:48px;height:48px;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">📈</div>
+                    <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-left:3px solid #a78bfa;border-radius:12px;padding:24px;">
+                        <h3 style="font-size:1.1rem;font-weight:700;color:#c4b5fd;margin-bottom:8px;">第二层 · 趋势分析</h3>
+                        <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.8;margin-bottom:12px;">
+                            在现状数据基础上判断<strong>方向与阶段</strong>。ADX 回答"趋势强不强"，DI 差值回答"多还是空"，趋势阶段回答"走到哪了"。
+                            AI 综合多周期数据输出研判——<strong>趋势延续、回调待涨、高位震荡、即将反转</strong>等，并给出实战信号评级：布局 / 关注 / 等待。
+                        </p>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                            <span style="padding:3px 10px;background:rgba(167,139,250,0.1);border-radius:6px;font-size:0.7rem;color:#c4b5fd;">信号: 布局/关注/等待</span>
+                            <span style="padding:3px 10px;background:rgba(167,139,250,0.1);border-radius:6px;font-size:0.7rem;color:#c4b5fd;">方向: 做多/做空/观望</span>
+                            <span style="padding:3px 10px;background:rgba(167,139,250,0.1);border-radius:6px;font-size:0.7rem;color:#c4b5fd;">ADX趋势强度</span>
+                            <span style="padding:3px 10px;background:rgba(167,139,250,0.1);border-radius:6px;font-size:0.7rem;color:#c4b5fd;">趋势初期</span>
+                            <span style="padding:3px 10px;background:rgba(167,139,250,0.1);border-radius:6px;font-size:0.7rem;color:#c4b5fd;">趋势成长</span>
+                            <span style="padding:3px 10px;background:rgba(167,139,250,0.1);border-radius:6px;font-size:0.7rem;color:#c4b5fd;">趋势成熟</span>
+                            <span style="padding:3px 10px;background:rgba(167,139,250,0.1);border-radius:6px;font-size:0.7rem;color:#c4b5fd;">趋势衰竭</span>
+                            <span style="padding:3px 10px;background:rgba(167,139,250,0.1);border-radius:6px;font-size:0.7rem;color:#c4b5fd;">多周期共振</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 连接线 -->
+                <div style="display:flex;align-items:center;padding:8px 0 8px 48px;">
+                    <div style="width:2px;height:32px;background:linear-gradient(180deg,#a78bfa,#4ade80);border-radius:1px;margin-right:12px;"></div>
+                    <span style="font-size:0.7rem;color:var(--text-muted);">方向清楚了，关键问题是：现在入场还来得及吗？</span>
+                </div>
+
+                <!-- Layer 3: 趋势预判 -->
+                <div style="display:flex;align-items:flex-start;gap:24px;">
+                    <div style="flex-shrink:0;width:48px;height:48px;background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🔮</div>
+                    <div style="flex:1;background:var(--bg-card);border:1px solid rgba(74,222,128,0.3);border-left:3px solid #4ade80;border-radius:12px;padding:24px;position:relative;overflow:hidden;">
+                        <div style="position:absolute;top:0;right:0;padding:8px 16px;background:rgba(74,222,128,0.15);border-radius:0 0 0 12px;font-size:0.7rem;font-weight:700;color:#86efac;">⭐ 核心创新</div>
+                        <h3 style="font-size:1.1rem;font-weight:700;color:#86efac;margin-bottom:8px;">第三层 · 趋势预判引擎</h3>
+                        <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.8;margin-bottom:12px;">
+                            系统的<strong>核心创新</strong>，回答交易员最关心的问题：<strong>能不能做？空间多大？风险在哪？</strong>
+                            趋势预判引擎对每个品种输出 <strong>0-100 的预判评分</strong>，基于四大维度加权计算：
+                        </p>
+                        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px;">
+                            <div style="background:var(--bg-elevated);border-radius:8px;padding:12px;">
+                                <div style="font-weight:700;font-size:0.85rem;color:var(--text-primary);">📈 趋势早期度</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">趋势刚启动(初期/成长)还是已走完(成熟/衰竭)？越早期分越高</div>
+                            </div>
+                            <div style="background:var(--bg-elevated);border-radius:8px;padding:12px;">
+                                <div style="font-weight:700;font-size:0.85rem;color:var(--text-primary);">💰 资金确认度</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">持仓量增减 + 主力资金流向是否配合趋势方向？</div>
+                            </div>
+                            <div style="background:var(--bg-elevated);border-radius:8px;padding:12px;">
+                                <div style="font-weight:700;font-size:0.85rem;color:var(--text-primary);">📍 位置安全度</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">RSI 在安全区域(40-60)还是极端区？追高风险有多大？</div>
+                            </div>
+                            <div style="background:var(--bg-elevated);border-radius:8px;padding:12px;">
+                                <div style="font-weight:700;font-size:0.85rem;color:var(--text-primary);">⚖️ 盈亏比系数</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">当前入场价到止损/止盈的距离比是否划算？</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                            <span style="padding:3px 10px;background:rgba(74,222,128,0.1);border-radius:6px;font-size:0.7rem;color:#86efac;">预判评分 0-100</span>
+                            <span style="padding:3px 10px;background:rgba(74,222,128,0.1);border-radius:6px;font-size:0.7rem;color:#86efac;">智能否决</span>
+                            <span style="padding:3px 10px;background:rgba(74,222,128,0.1);border-radius:6px;font-size:0.7rem;color:#86efac;">趋势空间(ATR)</span>
+                            <span style="padding:3px 10px;background:rgba(74,222,128,0.1);border-radius:6px;font-size:0.7rem;color:#86efac;">建议入场区</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 否决机制说明 -->
+            <div style="max-width:900px;margin:0 auto 60px;">
+                <h3 style="text-align:center;font-size:1.2rem;font-weight:700;margin-bottom:24px;color:var(--text-primary);">⛔ 否决机制 —— 宁可错过，不做错</h3>
+                <p style="text-align:center;font-size:0.85rem;color:var(--text-secondary);margin-bottom:32px;">
+                    当技术指标给出"做多"建议时，系统会先执行三道硬性否决检查，任一触发即禁止入场：
+                </p>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+                    <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:12px;padding:20px;text-align:center;">
+                        <div style="font-size:1.5rem;margin-bottom:8px;">🚫</div>
+                        <div style="font-weight:700;font-size:0.9rem;color:#f85149;margin-bottom:6px;">RSI 超买否决</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.7;">
+                            RSI ≥ 75 → 禁止追多<br>
+                            RSI ≤ 25 → 禁止追空<br>
+                            <span style="color:#f5b5b0;font-size:0.7rem;">螺纹钢 RSI=83 时触发此否决</span>
+                        </div>
+                    </div>
+                    <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:12px;padding:20px;text-align:center;">
+                        <div style="font-size:1.5rem;margin-bottom:8px;">📉</div>
+                        <div style="font-weight:700;font-size:0.9rem;color:#f85149;margin-bottom:6px;">深贴水否决</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.7;">
+                            年化展期收益率 < -10%<br>
+                            → 禁止做多<br>
+                            <span style="color:#f5b5b0;font-size:0.7rem;">期限结构严重利空时触发</span>
+                        </div>
+                    </div>
+                    <div style="background:rgba(248,81,73,0.06);border:1px solid rgba(248,81,73,0.25);border-radius:12px;padding:20px;text-align:center;">
+                        <div style="font-size:1.5rem;margin-bottom:8px;">⚠️</div>
+                        <div style="font-weight:700;font-size:0.9rem;color:#f85149;margin-bottom:6px;">趋势衰竭否决</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.7;">
+                            ADX > 50 且 RSI 极端<br>
+                            → 大概率见顶/见底<br>
+                            <span style="color:#f5b5b0;font-size:0.7rem;">纯碱 ADX=52+RSI=83 时触发</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <!-- 算力投入 -->
+    <section class="section-padding-compact" style="background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.06) 50%, rgba(34,211,238,0.04) 100%); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="container">
+            <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 16px;">🧬</div>
+                <h2 style="font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; margin-bottom: 12px; line-height: 1.4;">
+                    累计消耗 <span class="gradient-text">10亿+ Token</span> 算力深度打造
+                </h2>
+                <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 24px;">
+                    这不是一个简单的 API 调用封装。系统核心决策链经历了 DeepSeek、千问等多个主流 AI 大模型的反复对弈与校验——
+                    从行情数据解析、技术指标逻辑、趋势预判公式到否决规则阈值，每一步都经过海量对话测试与迭代优化。
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+                    <div style="background: var(--bg-card); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; padding: 20px;">
+                        <div style="font-size: 1.8rem; margin-bottom: 6px;">🤖</div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary-light);">DeepSeek</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">行情研判 · 趋势分析</div>
+                    </div>
+                    <div style="background: var(--bg-card); border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 20px;">
+                        <div style="font-size: 1.8rem; margin-bottom: 6px;">🧠</div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color: #a78bfa;">千问</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">策略设计 · 规则优化</div>
+                    </div>
+                    <div style="background: var(--bg-card); border: 1px solid rgba(34,211,238,0.3); border-radius: 12px; padding: 20px;">
+                        <div style="font-size: 1.8rem; margin-bottom: 6px;">🔬</div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent);">深度对弈</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">多模型交叉验证</div>
+                    </div>
+                    <div style="background: var(--bg-card); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 20px;">
+                        <div style="font-size: 1.8rem; margin-bottom: 6px;">⚡</div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color: var(--success);">10亿+</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">Token 算力投入</div>
+                    </div>
+                </div>
+                <p style="font-size: 0.95rem; color: var(--text-primary); font-weight: 600;">
+                    相当于 <span style="color: var(--primary-light);">10 年专业交易员</span> 的知识积累与决策经验，一次性注入系统
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 产品优势 -->
+    <section id="advantages" class="section-padding-compact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">产品优势</span>
+                <h2 class="section-title">面向交易执行的核心优势</h2>
+                <p class="section-subtitle">不是指标堆砌，而是围绕实盘可用性设计</p>
+            </div>
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <div class="advantage-icon">🚀</div>
+                    <h3>全自动定时运行</h3>
+                    <p>Celery 异步任务驱动，早盘前、午盘前、每4小时自动更新全品种分析。价格实时刷新 + Redis 缓存，数据始终保持最新。</p>
+                    <div class="advantage-features">
+                        <span class="advantage-tag">定时任务</span>
+                        <span class="advantage-tag">自动分析</span>
+                        <span class="advantage-tag">实时价格</span>
+                    </div>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-icon">🧠</div>
+                    <h3>AI + 趋势双验证</h3>
+                    <p>AI 负责理解和归因，趋势分析负责验证方向。多重交叉确认，避免单一指标误导。</p>
+                    <div class="advantage-features">
+                        <span class="advantage-tag">AI 研判</span>
+                        <span class="advantage-tag">趋势分析</span>
+                        <span class="advantage-tag">多周期验证</span>
+                    </div>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-icon">🔒</div>
+                    <h3>以风控为先</h3>
+                    <p>仓位、止损、止盈协同约束，优先控制回撤再追求收益，适配长期实盘生存逻辑。</p>
+                    <div class="advantage-features">
+                        <span class="advantage-tag">动态止损</span>
+                        <span class="advantage-tag">仓位控制</span>
+                        <span class="advantage-tag">盈亏比约束</span>
+                    </div>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-icon">📊</div>
+                    <h3>信号分级快速筛选</h3>
+                    <p>布局、关注、等待三档信号评级，让你快速锁定重点品种，不被信息淹没。</p>
+                    <div class="advantage-features">
+                        <span class="advantage-tag">布局信号</span>
+                        <span class="advantage-tag">关注信号</span>
+                        <span class="advantage-tag">等待信号</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 使用流程 -->
+    <section class="section-padding-compact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">使用流程</span>
+                <h2 class="section-title">简单 3 步，快速上手</h2>
+                <p class="section-subtitle">注册即用，每天登录赠送免费分析次数</p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 750px; margin: 0 auto;">
+                <div class="feature-card">
+                    <div class="feature-icon">①</div>
+                    <h3>注册登录</h3>
+                    <p>免费注册账号，每天登录自动赠送 3 次分析额度，立即体验全部功能。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">②</div>
+                    <h3>查看信号</h3>
+                    <p>进入 Dashboard 查看品种信号评级，快速锁定"布局"和"关注"档的重点品种。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">③</div>
+                    <h3>辅助决策</h3>
+                    <p>结合 AI 研判、趋势分析、盈亏比建议，做出更有依据的交易决策。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 使用说明 -->
+    <section id="pricing" class="section-padding-compact pricing-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">简单易用</span>
+                <h2 class="section-title">注册即用，轻松上手</h2>
+                <p class="section-subtitle">每日赠送免费分析次数，助你快速掌握市场动态</p>
+            </div>
+            <div style="max-width: 700px; margin: 0 auto; display: flex; justify-content: center;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%;">
+                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">📝</div>
+                        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 8px;">免费注册</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">简单注册，立即使用全部功能</p>
+                    </div>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">🎁</div>
+                        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 8px;">每日赠送</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">每天登录赠送 3 次免费分析</p>
+                    </div>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">📊</div>
+                        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 8px;">全面分析</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">AI 研判 + 趋势分析 + 风控建议</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我们 -->
+    <section id="contact" class="section-padding-compact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">合作共赢</span>
+                <h2 class="section-title">联系我们</h2>
+                <p class="section-subtitle">寻求行业合作，共同打造专业的期货分析平台</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <h3>🌐 商务合作</h3>
+                        <p>诚邀有运营能力、渠道资源的团队或个人合作，共同推广产品、打造品牌、实现运营变现。</p>
+                        <div class="contact-tags">
+                            <span class="contact-tag">渠道合作</span>
+                            <span class="contact-tag">品牌推广</span>
+                            <span class="contact-tag">运营变现</span>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <h3>💬 交流反馈</h3>
+                        <p>如有问题、建议或想交流期货分析，欢迎扫码添加微信，备注"AI 期货分析助手"。</p>
+                        <div class="contact-tags">
+                            <span class="contact-tag">问题反馈</span>
+                            <span class="contact-tag">功能建议</span>
+                            <span class="contact-tag">使用帮助</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-qr">
+                    <div class="qr-icon">📱</div>
+                    <h4>扫码加微信</h4>
+                    <p>备注：AI 期货分析助手</p>
+                    <div class="qr-image">
+                        <img src="{{ url_for('static', filename='images/code.jpg') }}" alt="微信二维码">
+                    </div>
+                    <div class="qr-tip">微信扫一扫</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-warning">
+                    <strong>⚠️ 风险提示：</strong>期货交易风险极高，可能损失全部本金。本系统仅提供辅助决策参考，不构成任何投资建议。投资者应谨慎决策，盈亏自负。
+                </div>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2026. 马骑兔 · AI 期货分析助手 - 智能分析，精准决策</p>
+                <p class="footer-icp">
+                    <a href="https://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">晋 ICP 备 11003942 号 -3</a>
+                    <span class="footer-divider-inline">|</span>
+                    <a target="_blank" title="51la 网站统计" href="https://v6.51.la/land/3OeoY59Q6yVEiioM">51LA 统计</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 微信弹窗 -->
+    <div class="modal-overlay" id="wechatModal" onclick="closeWechatModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeWechatModal()">×</button>
+            <div class="modal-icon">💬</div>
+            <h3>添加微信好友</h3>
+            <p>扫描下方二维码，备注"AI 期货分析助手"</p>
+            <div class="modal-qr">
+                <img src="{{ url_for('static', filename='images/code.jpg') }}" alt="微信二维码">
+            </div>
+            <div class="modal-tip">
+                <strong>备注：</strong>AI 期货分析助手
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 微信弹窗控制
+        function showWechatModal() {
+            document.getElementById('wechatModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeWechatModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('wechatModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ESC 键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeWechatModal();
+        });
+
+        // 移动端菜单切换
+        function toggleMobileMenu() {
+            const navMenu = document.querySelector('.nav-menu');
+            navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        // 滚动时导航栏效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(10, 10, 10, 0.95)';
+            } else {
+                navbar.style.background = 'rgba(10, 10, 10, 0.85)';
+            }
+        });
+        
+        // =====================================
+        // AI 期货分析动画 - 实时数据模拟
+        // =====================================
+        
+        // 价格数据
+        const priceElement = document.getElementById('livePrice');
+        const changeElement = document.getElementById('priceChange');
+        let basePrice = 4582.50;
+        
+        // 模拟价格波动
+        function updatePrice() {
+            // 随机波动 -5 到 +5
+            const change = (Math.random() - 0.5) * 10;
+            basePrice += change;
+            
+            // 格式化价格
+            const formattedPrice = basePrice.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            priceElement.textContent = formattedPrice;
+            
+            // 计算涨跌幅（相对于初始价格 4500）
+            const percentChange = (basePrice - 4500) / 4500 * 100;
+            const sign = percentChange >= 0 ? '+' : '';
+            
+            changeElement.textContent = `${sign}${percentChange.toFixed(2)}%`;
+            
+            // 更新颜色
+            if (percentChange >= 0) {
+                changeElement.className = 'price-change up';
+                priceElement.style.background = 'linear-gradient(135deg, #10b981, #34d399)';
+                priceElement.style.webkitBackgroundClip = 'text';
+            } else {
+                changeElement.className = 'price-change down';
+                priceElement.style.background = 'linear-gradient(135deg, #ef4444, #f87171)';
+                priceElement.style.webkitBackgroundClip = 'text';
+            }
+        }
+        
+        // 每 2 秒更新一次价格
+        setInterval(updatePrice, 2000);
+        
+        // 指标数据元素
+        const macdElement = document.querySelector('.floating-data-1');
+        const rsiElement = document.querySelector('.floating-data-2');
+        const adxElement = document.querySelector('.floating-data-3');
+        
+        // 模拟指标变化
+        function updateIndicators() {
+            // MACD: -0.05 到 0.05
+            const macd = (Math.random() - 0.5) * 0.1;
+            const macdSignal = macd >= 0 ? '金叉' : '死叉';
+            const macdColor = macd >= 0 ? '#10b981' : '#ef4444';
+            macdElement.textContent = `MACD: ${macd.toFixed(3)} ${macdSignal}`;
+            macdElement.style.color = macdColor;
+            
+            // RSI: 30 到 70
+            const rsi = 30 + Math.random() * 40;
+            let rsiStatus = rsi > 70 ? '超买' : rsi < 30 ? '超卖' : '中性';
+            const rsiColor = rsi > 70 ? '#ef4444' : rsi < 30 ? '#10b981' : '#f59e0b';
+            rsiElement.textContent = `RSI: ${rsi.toFixed(1)} ${rsiStatus}`;
+            rsiElement.style.color = rsiColor;
+            
+            // ADX: 20 到 45
+            const adx = 20 + Math.random() * 25;
+            const adxStatus = adx > 35 ? '强趋势' : adx > 25 ? '趋势中' : '震荡';
+            const adxColor = adx > 35 ? '#10b981' : adx > 25 ? '#f59e0b' : '#6b7280';
+            adxElement.textContent = `ADX: ${adx.toFixed(1)} ${adxStatus}`;
+            adxElement.style.color = adxColor;
+        }
+        
+        // 每 3 秒更新一次指标
+        setInterval(updateIndicators, 3000);
+        
+        // 初始化
+        updatePrice();
+        updateIndicators();
+    </script>
+    
+    <!-- 51.la 网站统计 -->
+    <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
+    <script>LA.init({id:"3OeoY59Q6yVEiioM",ck:"3OeoY59Q6yVEiioM"})</script>
+</body>
+</html>

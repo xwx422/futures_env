@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>更新日志 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --bg-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-purple: #a371f7;
+            --neon-yellow: #d29922;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn-primary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-primary:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .nav-btn-logout {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-logout:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 表格 */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.125rem;
+        }
+
+        .table-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        tr:hover {
+            background: var(--bg-elevated);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--neon-green);
+        }
+
+        .status-running {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--neon-blue);
+        }
+
+        .status-failed {
+            color: var(--neon-red);
+        }
+
+        .error-row {
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .error-detail {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .error-icon {
+            color: var(--neon-red);
+        }
+
+        .error-text {
+            color: var(--neon-red);
+            font-weight: 600;
+        }
+
+        .actions {
+            white-space: nowrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background: var(--neon-blue);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--neon-blue-light);
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--neon-red), #da3633);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .modal-content p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .message {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .page-link {
+            padding: 0.5rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .page-link.active {
+            background: var(--neon-blue);
+            border-color: var(--neon-blue);
+            color: white;
+        }
+
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" style="background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, #a371f7, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⚙️ 管理后台</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="/xwx422" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                <span>←</span> 返回控制台
+            </a>
+            <a href="/dashboard" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                📊 数据展示
+            </a>
+            <a href="/change_password" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                🔐 修改密码
+            </a>
+            <a href="/logout" style="background: transparent; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#f85149'; this.style.color='#f85149';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                退出
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">📝 数据更新日志</h1>
+        </div>
+
+        <!-- 日志列表 -->
+        <div class="table-card">
+            <div class="table-header">
+                <div>
+                    <h2 class="table-title">更新记录</h2>
+                    <p class="table-subtitle">共 {{ total }} 条记录</p>
+                </div>
+                <div class="table-actions">
+                    <button onclick="confirmClearLogs()" class="btn btn-sm btn-danger">
+                        🗑️ 清空日志
+                    </button>
+                </div>
+            </div>
+            {% if logs %}
+             <table>
+                 <thead>
+                     <tr>
+                         <th>操作时间</th>
+                         <th>操作账号</th>
+                         <th>状态</th>
+                         <th>耗时</th>
+                         <th>信息</th>
+                         <th>操作</th>
+                     </tr>
+                 </thead>
+                 <tbody>
+                     {% for log in logs %}
+                     <tr class="{% if log.status == 'failed' %}error-row{% endif %}">
+                         <td>{{ log.update_time }}</td>
+                         <td>{{ log.username }}</td>
+                         <td>
+                             {% if log.status == 'success' %}
+                             <span class="status-badge status-success">✓ 成功</span>
+                             {% elif log.status == 'running' %}
+                             <span class="status-badge status-running">⟳ 运行中</span>
+                             {% else %}
+                             <span class="status-badge status-failed">✗ 失败</span>
+                             {% endif %}
+                         </td>
+                         <td class="duration">
+                             {% if log.duration_seconds %}
+                                 {% if log.duration_seconds >= 60 %}
+                                     {{ log.duration_seconds // 60 }}分{{ log.duration_seconds % 60 }}秒
+                                 {% else %}
+                                     {{ log.duration_seconds }}秒
+                                 {% endif %}
+                             {% else %}
+                                 -
+                             {% endif %}
+                         </td>
+                         <td class="message" title="{{ log.message or '' }}">
+                             {{ log.message or '-' }}
+                             {% if log.status == 'failed' and log.error_message %}
+                             <div class="error-detail" title="{{ log.error_message }}">
+                                 <span class="error-icon">⚠️</span>
+                                 <span class="error-text">有错误</span>
+                             </div>
+                             {% endif %}
+                         </td>
+                         <td class="actions">
+                             <a href="{{ url_for('admin_update_log_detail', log_id=log.id) }}" class="btn btn-sm btn-primary">
+                                 查看详情
+                             </a>
+                         </td>
+                     </tr>
+                     {% endfor %}
+                 </tbody>
+             </table>
+
+            <!-- 分页 -->
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="{{ url_for('admin_update_logs', page=page-1) }}" class="page-link">← 上一页</a>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <span class="page-link active">{{ p }}</span>
+                    {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                    <a href="{{ url_for('admin_update_logs', page=p) }}" class="page-link">{{ p }}</a>
+                    {% elif p == page - 3 or p == page + 3 %}
+                    <span class="page-link disabled">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <a href="{{ url_for('admin_update_logs', page=page+1) }}" class="page-link">下一页 →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 确认对话框 -->
+    <div id="confirmDialog" class="modal">
+        <div class="modal-content">
+            <h3>确认清空日志</h3>
+            <p>确定要清空所有数据更新日志吗？此操作不可恢复。</p>
+            <div class="modal-actions">
+                <button onclick="closeConfirmDialog()" class="btn btn-secondary">取消</button>
+                <button onclick="clearLogs()" class="btn btn-danger">确定清空</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmClearLogs() {
+            document.getElementById('confirmDialog').style.display = 'flex';
+        }
+
+        function closeConfirmDialog() {
+            document.getElementById('confirmDialog').style.display = 'none';
+        }
+
+        function clearLogs() {
+            fetch('/xwx422/logs/update/clear', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('日志清空成功！');
+                    window.location.reload();
+                } else {
+                    alert('清空失败：' + (data.error || '未知错误'));
+                }
+                closeConfirmDialog();
+            })
+            .catch(error => {
+                alert('请求失败：' + error.message);
+                closeConfirmDialog();
+            });
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('confirmDialog').addEventListener('click', function(e) {
+            if (e.target.id === 'confirmDialog') {
+                closeConfirmDialog();
+            }
+        });
+    </script>
+</body>
+</html>

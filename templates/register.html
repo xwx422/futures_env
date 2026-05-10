@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #c9d1d9;
+            --text-muted: #6e7681;
+            --neon-blue: #00d4ff;
+            --neon-blue-dark: #0099cc;
+            --neon-green: #00ff88;
+            --neon-red: #ff4757;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+            --glow-blue: 0 0 20px rgba(0, 212, 255, 0.3);
+            --radius-xl: 0.625rem;
+            --spacing-lg: 0.75rem;
+            --spacing-xl: 1rem;
+            --spacing-2xl: 1.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+        }
+
+        .register-wrapper {
+            display: flex;
+            gap: 24px;
+            max-width: 900px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        .register-container {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
+            box-shadow: var(--glow-blue);
+        }
+
+        .qrcode-panel {
+            width: 320px;
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .qrcode-panel-header {
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .qrcode-panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .qrcode-panel-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .qrcode-container {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: var(--spacing-xl);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .qrcode-container img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .qrcode-steps {
+            text-align: left;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: var(--spacing-xl);
+            width: 100%;
+        }
+
+        .qrcode-steps-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--neon-blue);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qrcode-steps-title::before {
+            content: '📱';
+        }
+
+        .step {
+            display: flex;
+            gap: 10px;
+            margin-bottom: var(--spacing-lg);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-blue-dark));
+            color: var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .step-text strong {
+            color: var(--neon-green);
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .register-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .register-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-lg);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem var(--spacing-lg);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.375rem;
+        }
+
+        .form-hint.error {
+            color: var(--neon-red);
+        }
+
+        .register-button {
+            width: 100%;
+            padding: 0.875rem var(--spacing-lg);
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-blue-dark));
+            color: var(--bg-primary);
+            border: none;
+            border-radius: var(--radius-xl);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: var(--glow-blue);
+        }
+
+        .register-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .register-button:active {
+            transform: translateY(0);
+        }
+
+        .register-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            color: #ff4757;
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--spacing-xl);
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--neon-green);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--spacing-xl);
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: var(--spacing-2xl);
+            padding-top: var(--spacing-2xl);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .login-link p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .login-link a {
+            display: inline-block;
+            padding: 0.625rem 1.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-hover);
+            color: var(--neon-blue);
+            text-decoration: none;
+            border-radius: var(--radius-xl);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .login-link a:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+        }
+
+        .optional-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 0.25rem;
+        }
+
+        .register-code-group {
+            position: relative;
+        }
+
+        .register-code-input {
+            letter-spacing: 0.5em;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .register-container,
+        .qrcode-panel {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .register-wrapper {
+                flex-direction: column;
+                max-width: 420px;
+            }
+
+            .qrcode-panel {
+                width: 100%;
+                order: -1;
+            }
+
+            .register-container {
+                padding: var(--spacing-xl);
+            }
+
+            .register-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-wrapper">
+        <div class="register-container">
+            <div class="register-header">
+                <h1 class="register-title">AI 期货分析助手</h1>
+                <p class="register-subtitle">注册账号，开始使用</p>
+            </div>
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            {% if success %}
+            <div class="success-message">
+                {{ success }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                <div class="form-group">
+                    <label class="form-label" for="username">账号 *</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        class="form-input"
+                        placeholder="请输入账号"
+                        required
+                        autofocus
+                        minlength="4"
+                        maxlength="20"
+                        pattern="[a-zA-Z][a-zA-Z0-9_-]*"
+                    >
+                    <div class="form-hint" id="usernameHint">4-20 位，必须以字母开头，仅支持字母、数字、下划线 (_)、连字符 (-)</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="phone">联系电话 *</label>
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        class="form-input"
+                        placeholder="请输入11位手机号码"
+                        required
+                        pattern="^1[3-9][0-9]{9}$"
+                        title="请输入正确的11位手机号码，以1开头"
+                    >
+                    <div class="form-hint">11位手机号码，用于账号安全和找回密码</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">密码 *</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input"
+                        placeholder="请输入密码（6 位以上）"
+                        required
+                        minlength="6"
+                    >
+                    <div class="form-hint">密码长度不少于 6 位</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirm_password">确认密码 *</label>
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        class="form-input"
+                        placeholder="请再次输入密码"
+                        required
+                        minlength="6"
+                    >
+                    <div class="form-hint" id="passwordHint"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="register_code">注册码 *</label>
+                    <input
+                        type="text"
+                        id="register_code"
+                        name="register_code"
+                        class="form-input register-code-input"
+                        placeholder="请输入4位注册码"
+                        required
+                        maxlength="4"
+                        pattern="[0-9]{4}"
+                        title="请输入4位数字注册码"
+                    >
+                    <div class="form-hint">
+                        🔑 关注右侧公众号 回复"期货分析助手"获取4位注册码
+                    </div>
+                </div>
+
+                <button type="submit" class="register-button" id="submitBtn">注册</button>
+            </form>
+
+            <div class="login-link">
+                <p>已有账号？</p>
+                <a href="{{ url_for('login') }}">🔐 返回登录</a>
+            </div>
+        </div>
+
+        <div class="qrcode-panel">
+            <div class="qrcode-panel-header">
+                <h2 class="qrcode-panel-title">获取注册码</h2>
+                <p class="qrcode-panel-subtitle">关注公众号，回复关键词自动获取注册码</p>
+            </div>
+
+            <div class="qrcode-container">
+                <img src="{{ url_for('static', filename='images/gzh.jpg') }}" alt="公众号二维码">
+            </div>
+
+            <div class="qrcode-steps">
+                <div class="qrcode-steps-title">注册步骤</div>
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">扫描上方二维码，关注<strong>微信公众号</strong></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">回复关键词<strong>"期货分析助手"</strong></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">获取<strong>注册码</strong>，完成账号注册</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">登录系统，享受<strong>AI 智能分析</strong>服务</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 账号验证规则
+        const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_-]{3,19}$/;
+
+        // 表单元素
+        const form = document.getElementById('registerForm');
+        const username = document.getElementById('username');
+        const usernameHint = document.getElementById('usernameHint');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const passwordHint = document.getElementById('passwordHint');
+        const registerCode = document.getElementById('register_code');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 账号实时验证
+        username.addEventListener('input', function() {
+            const value = this.value;
+
+            if (value.length === 0) {
+                usernameHint.textContent = '4-20 位，必须以字母开头，仅支持字母、数字、下划线 (_)、连字符 (-)';
+                usernameHint.className = 'form-hint';
+                this.style.borderColor = '';
+            } else if (value.length < 4) {
+                usernameHint.textContent = '账号长度不能少于 4 位';
+                usernameHint.className = 'form-hint error';
+                this.style.borderColor = 'var(--neon-red)';
+            } else if (value.length > 20) {
+                usernameHint.textContent = '账号长度不能超过 20 位';
+                usernameHint.className = 'form-hint error';
+                this.style.borderColor = 'var(--neon-red)';
+            } else if (!usernameRegex.test(value)) {
+                usernameHint.textContent = '账号必须以字母开头，仅支持字母、数字、下划线、连字符';
+                usernameHint.className = 'form-hint error';
+                this.style.borderColor = 'var(--neon-red)';
+            } else {
+                usernameHint.textContent = '账号格式正确';
+                usernameHint.className = 'form-hint';
+                this.style.borderColor = 'var(--neon-green)';
+            }
+        });
+
+        // 密码匹配验证
+        function validatePassword() {
+            if (confirmPassword.value && password.value !== confirmPassword.value) {
+                passwordHint.textContent = '两次输入的密码不一致';
+                passwordHint.className = 'form-hint error';
+                confirmPassword.style.borderColor = 'var(--neon-red)';
+                return false;
+            } else {
+                passwordHint.textContent = '';
+                passwordHint.className = 'form-hint';
+                confirmPassword.style.borderColor = '';
+                return true;
+            }
+        }
+
+        confirmPassword.addEventListener('input', validatePassword);
+        password.addEventListener('input', function() {
+            if (confirmPassword.value) {
+                validatePassword();
+            }
+        });
+
+        // 注册码输入限制（仅数字，4位）
+        registerCode.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 4) {
+                this.value = this.value.slice(0, 4);
+            }
+        });
+
+        // 提交表单验证
+        form.addEventListener('submit', function(e) {
+            const usernameValue = username.value;
+            const codeValue = registerCode.value;
+
+            // 验证账号格式
+            if (usernameValue.length < 4 || usernameValue.length > 20) {
+                e.preventDefault();
+                usernameHint.textContent = '账号长度需为 4-20 位';
+                usernameHint.className = 'form-hint error';
+                username.focus();
+                submitBtn.disabled = false;
+                submitBtn.textContent = '注册';
+                return false;
+            }
+
+            if (!usernameRegex.test(usernameValue)) {
+                e.preventDefault();
+                usernameHint.textContent = '账号格式不正确，请使用字母、数字、下划线或连字符，且必须以字母开头';
+                usernameHint.className = 'form-hint error';
+                username.focus();
+                submitBtn.disabled = false;
+                submitBtn.textContent = '注册';
+                return false;
+            }
+
+            if (password.value !== confirmPassword.value) {
+                e.preventDefault();
+                passwordHint.textContent = '两次输入的密码不一致';
+                passwordHint.className = 'form-hint error';
+                confirmPassword.focus();
+                submitBtn.disabled = false;
+                submitBtn.textContent = '注册';
+                return false;
+            }
+
+            if (codeValue.length !== 4) {
+                e.preventDefault();
+                registerCode.focus();
+                submitBtn.disabled = false;
+                submitBtn.textContent = '注册';
+                return false;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '注册中...';
+        });
+
+        // 自动聚焦到账号输入框
+        document.addEventListener('DOMContentLoaded', function() {
+            if (username) {
+                username.focus();
+            }
+        });
+    </script>
+</body>
+</html>

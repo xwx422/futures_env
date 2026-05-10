@@ -1,0 +1,113 @@
+{
+    "name": "AI期货分析助手",
+    "short_name": "期货AI",
+    "description": "基于AI的智能期货辅助决策系统，提供全自动复盘、多维度AI研判、动态风控服务。",
+    "start_url": "/mobile/dashboard",
+    "id": "/mobile/dashboard",
+    "display": "standalone",
+    "background_color": "#0a0e1a",
+    "theme_color": "#0a0e1a",
+    "orientation": "portrait",
+    "scope": "/",
+    "lang": "zh-CN",
+    "dir": "ltr",
+    "icons": [
+        {
+            "src": "/static/images/icon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/static/images/icon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/static/images/icon-128x128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/static/images/icon-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/static/images/icon-152x152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/static/images/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/static/images/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/static/images/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable any"
+        }
+    ],
+    "categories": ["finance", "business", "productivity"],
+    "screenshots": [
+        {
+            "src": "/static/images/list.jpeg",
+            "sizes": "1200x800",
+            "type": "image/jpeg",
+            "form_factor": "narrow",
+            "label": "品种列表"
+        },
+        {
+            "src": "/static/images/detail.jpeg",
+            "sizes": "1200x800",
+            "type": "image/jpeg",
+            "form_factor": "narrow",
+            "label": "品种详情"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "数据看板",
+            "short_name": "看板",
+            "description": "查看期货品种实时行情",
+            "url": "/mobile/dashboard",
+            "icons": [
+                {
+                    "src": "/static/images/icon-96x96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "会员中心",
+            "short_name": "会员",
+            "description": "查看会员信息和设置",
+            "url": "/mobile/profile",
+            "icons": [
+                {
+                    "src": "/static/images/icon-96x96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "handle_links": "preferred"
+}

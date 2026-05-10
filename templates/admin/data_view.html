@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据查看 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2128;
+            --bg-elevated: #21262d;
+            --bg-hover: #262c36;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-yellow: #d29922;
+            --neon-purple: #a371f7;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--neon-blue);
+        }
+
+        .filter-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-input,
+        .filter-select {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-blue), #0066cc);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .group-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .group-tab {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .group-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        .group-tab.active {
+            color: var(--neon-blue);
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--bg-elevated);
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .table tbody tr:hover {
+            background: var(--bg-hover);
+        }
+
+        .direction-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .direction-badge.long {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--neon-green);
+        }
+
+        .direction-badge.short {
+            background: rgba(248, 81, 73, 0.15);
+            color: var(--neon-red);
+        }
+
+        .direction-badge.hold,
+        .direction-badge.watch {
+            background: rgba(210, 153, 34, 0.15);
+            color: var(--neon-yellow);
+        }
+
+        .direction-badge.none {
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+        }
+
+        .variety-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .variety-code {
+            font-weight: 600;
+            color: var(--neon-blue);
+        }
+
+        .variety-name {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .time-text {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-btn.active {
+            background: var(--neon-blue);
+            border-color: var(--neon-blue);
+            color: white;
+        }
+
+        .page-info {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            padding: 0 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部栏 -->
+    <nav class="navbar" style="background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, #a371f7, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⚙️ 管理后台</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="/xwx422" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                <span>←</span> 返回控制台
+            </a>
+            <a href="/dashboard" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                📊 数据展示
+            </a>
+            <a href="/change_password" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                🔐 修改密码
+            </a>
+            <a href="/logout" style="background: transparent; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#f85149'; this.style.color='#f85149';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                退出
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">🔍 数据查看</h1>
+            <p style="color: var(--text-secondary);">浏览数据库中所有期货分析数据</p>
+        </div>
+        <!-- 统计栏 -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">总记录数：</span>
+                <span class="stat-value">{{ total }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">当前页码：</span>
+                <span class="stat-value">{{ page }} / {{ total_pages if total_pages > 0 else 1 }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">每页显示：</span>
+                <span class="stat-value">{{ per_page }}</span>
+            </div>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+            <form method="GET" class="filter-row">
+                <input type="hidden" name="group_by" value="{{ group_by }}">
+                
+                <div class="filter-group">
+                    <label class="filter-label">品种代码</label>
+                    <select name="variety_code" class="filter-select">
+                        <option value="">全部品种</option>
+                        {% for v in varieties %}
+                        <option value="{{ v.variety_code }}" {% if variety_code == v.variety_code %}selected{% endif %}>
+                            {{ v.variety_code }} - {{ v.variety_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">交易方向</label>
+                    <select name="direction" class="filter-select">
+                        <option value="">全部方向</option>
+                        <option value="做多" {% if trade_direction == '做多' %}selected{% endif %}>做多</option>
+                        <option value="做空" {% if trade_direction == '做空' %}selected{% endif %}>做空</option>
+                        <option value="观望" {% if trade_direction == '观望' %}selected{% endif %}>观望</option>
+                        <option value="持有" {% if trade_direction == '持有' %}selected{% endif %}>持有</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">每页条数</label>
+                    <select name="per_page" class="filter-select">
+                        <option value="10" {% if per_page == 10 %}selected{% endif %}>10 条</option>
+                        <option value="20" {% if per_page == 20 %}selected{% endif %}>20 条</option>
+                        <option value="50" {% if per_page == 50 %}selected{% endif %}>50 条</option>
+                        <option value="100" {% if per_page == 100 %}selected{% endif %}>100 条</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group" style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> 查询
+                    </button>
+                    <a href="/xwx422/data_view" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> 重置
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 分组标签 -->
+        <div class="group-tabs">
+            <a href="/xwx422/data_view?group_by=latest&page=1" class="group-tab {% if group_by == 'latest' %}active{% endif %}">
+                <i class="fas fa-star"></i> 最新记录
+            </a>
+            <a href="/xwx422/data_view?group_by=all&page=1" class="group-tab {% if group_by == 'all' %}active{% endif %}">
+                <i class="fas fa-list"></i> 全部记录
+            </a>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-table"></i>
+                    {% if group_by == 'latest' %}
+                    最新分析记录（每个品种一条）
+                    {% else %}
+                    全部分析记录
+                    {% endif %}
+                </h3>
+                <span style="color: var(--text-muted); font-size: 0.875rem;">
+                    共 {{ total }} 条数据
+                </span>
+            </div>
+            <div class="table-container">
+                {% if records %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>品种</th>
+                            <th>交易方向</th>
+                            <th>资金胜率</th>
+                            <th>风险回报比</th>
+                            <th>更新时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>
+                                <div class="variety-tag">
+                                    <span class="variety-code">{{ record.variety_code }}</span>
+                                    <span class="variety-name">{{ record.variety_name or '' }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                {% set direction = record.trade_direction or '观望' %}
+                                <span class="direction-badge {% if '多' in direction %}long{% elif '空' in direction %}short{% elif '持有' in direction %}hold{% else %}watch{% endif %}">
+                                    {% if '多' in direction %}
+                                    <i class="fas fa-arrow-up"></i>
+                                    {% elif '空' in direction %}
+                                    <i class="fas fa-arrow-down"></i>
+                                    {% elif '持有' in direction %}
+                                    <i class="fas fa-hand-paper"></i>
+                                    {% else %}
+                                    <i class="fas fa-eye"></i>
+                                    {% endif %}
+                                    {{ direction }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="color: {% if record.fund_probability >= 70 %}var(--neon-green){% elif record.fund_probability >= 40 %}var(--neon-yellow){% else %}var(--neon-red){% endif %}; font-weight: 600;">
+                                    {{ "%.1f"|format(record.fund_probability) if record.fund_probability else '-' }}%
+                                </span>
+                            </td>
+                            <td>
+                                {% if record.risk_reward_ratio %}
+                                <span style="color: {% if record.risk_reward_ratio >= 2 %}var(--neon-green){% elif record.risk_reward_ratio >= 1 %}var(--neon-yellow){% else %}var(--neon-red){% endif %};">
+                                    {{ "%.2f"|format(record.risk_reward_ratio) }}:1
+                                </span>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="time-text">{{ record.run_time }}</span>
+                            </td>
+                            <td>
+                                <a href="/variety/{{ record.variety_code }}" class="btn btn-secondary btn-sm" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem;" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> 查看详情
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <div class="empty-state-title">暂无数据</div>
+                    <p>请尝试调整筛选条件或检查数据库是否有分析记录</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 分页 -->
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                <a href="?page=1&per_page={{ per_page }}&group_by={{ group_by }}&variety_code={{ variety_code }}&direction={{ trade_direction }}" 
+                   class="page-btn" {% if page == 1 %}disabled{% endif %}>
+                    <i class="fas fa-step-backward"></i>
+                </a>
+                
+                <a href="?page={{ page - 1 }}&per_page={{ per_page }}&group_by={{ group_by }}&variety_code={{ variety_code }}&direction={{ trade_direction }}" 
+                   class="page-btn" {% if page == 1 %}disabled{% endif %}>
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                
+                {% set start_page = [1, page - 2]|max %}
+                {% set end_page = [total_pages, page + 2]|min %}
+                
+                {% if start_page > 1 %}
+                <span class="page-info">...</span>
+                {% endif %}
+                
+                {% for p in range(start_page, end_page + 1) %}
+                <a href="?page={{ p }}&per_page={{ per_page }}&group_by={{ group_by }}&variety_code={{ variety_code }}&direction={{ trade_direction }}" 
+                   class="page-btn {% if p == page %}active{% endif %}">
+                    {{ p }}
+                </a>
+                {% endfor %}
+                
+                {% if end_page < total_pages %}
+                <span class="page-info">...</span>
+                {% endif %}
+                
+                <a href="?page={{ page + 1 }}&per_page={{ per_page }}&group_by={{ group_by }}&variety_code={{ variety_code }}&direction={{ trade_direction }}" 
+                   class="page-btn" {% if page == total_pages %}disabled{% endif %}>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                
+                <a href="?page={{ total_pages }}&per_page={{ per_page }}&group_by={{ group_by }}&variety_code={{ variety_code }}&direction={{ trade_direction }}" 
+                   class="page-btn" {% if page == total_pages %}disabled{% endif %}>
+                    <i class="fas fa-step-forward"></i>
+                </a>
+                
+                <span class="page-info">
+                    跳转到
+                    <input type="number" min="1" max="{{ total_pages }}" 
+                           class="filter-input" 
+                           style="width: 60px; padding: 0.25rem 0.5rem; text-align: center;"
+                           onkeydown="if(event.key==='Enter'){window.location.href='?page='+this.value+'&per_page={{ per_page }}&group_by={{ group_by }}&variety_code={{ variety_code }}&direction={{ trade_direction }}';}">
+                    页
+                </span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

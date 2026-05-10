@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员管理 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --bg-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-purple: #a371f7;
+            --neon-cyan: #39c5cf;
+            --neon-yellow: #d29922;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn-primary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-primary:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .nav-btn-logout {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-logout:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        /* 搜索和工具栏 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-input {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            width: 240px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .btn-primary {
+            background: var(--neon-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1f6feb;
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .btn-success {
+            background: var(--neon-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2ea043;
+        }
+
+        .btn-danger {
+            background: var(--neon-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #da3633;
+        }
+
+        .btn-warning {
+            background: var(--neon-yellow);
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: #c9a227;
+        }
+
+        .btn-info {
+            background: var(--neon-cyan);
+            color: #000;
+        }
+
+        .btn-info:hover {
+            background: #2eb8c0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 批量操作栏 */
+        .batch-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .selected-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-right: 0.5rem;
+        }
+
+        /* 添加用户区域 */
+        .add-user-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-user-form {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .form-input {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* 表格 */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8125rem;
+        }
+
+        th, td {
+            padding: 0.625rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        th {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        tr:hover {
+            background: var(--bg-elevated);
+        }
+
+        tr.selected {
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        /* 复选框 */
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--neon-blue);
+        }
+
+        /* 标签样式 */
+        .badge {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-trial {
+            background: rgba(210, 153, 34, 0.15);
+            color: var(--neon-yellow);
+        }
+
+        .badge-admin {
+            background: rgba(163, 113, 247, 0.15);
+            color: var(--neon-purple);
+        }
+
+        .badge-enabled {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--neon-green);
+        }
+
+        .badge-disabled {
+            background: rgba(248, 81, 73, 0.15);
+            color: var(--neon-red);
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .page-link {
+            padding: 0.375rem 0.75rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .page-link.active {
+            background: var(--neon-blue);
+            border-color: var(--neon-blue);
+            color: white;
+        }
+
+        .page-info {
+            padding: 0.375rem 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        /* Flash 消息 */
+        .flash-messages {
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-error {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+            color: var(--neon-red);
+        }
+
+        .alert-success {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            color: var(--neon-green);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .modal-label {
+            display: block;
+            margin-bottom: 0.375rem;
+            color: var(--text-secondary);
+            font-size: 0.8125rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .search-input {
+                flex: 1;
+            }
+
+            .batch-actions {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .add-user-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-input {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">⚙️ 管理后台</div>
+        <div class="nav-menu">
+            <a href="/xwx422" class="nav-btn nav-btn-primary">← 返回控制台</a>
+            <a href="/dashboard" class="nav-btn nav-btn-primary">📊 数据展示</a>
+            <a href="/change_password" class="nav-btn nav-btn-primary">🔐 修改密码</a>
+            <a href="/logout" class="nav-btn nav-btn-logout">退出</a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">👥 用户管理</h1>
+        </div>
+
+        <!-- Flash 消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- 添加用户 -->
+        <div class="add-user-section">
+            <form method="POST" action="{{ url_for('admin_add_member') }}" class="add-user-form">
+                <input type="text" name="username" class="form-input" placeholder="账号" required style="width: 140px;">
+                <input type="password" name="password" class="form-input" placeholder="初始密码" required minlength="6" style="width: 140px;">
+                <input type="text" name="phone" class="form-input" placeholder="手机号（可选）" pattern="[0-9]{11}" style="width: 140px;">
+                <select name="role" class="form-input" style="width: 100px;">
+                    <option value="member">会员</option>
+                    <option value="admin">管理员</option>
+                </select>
+                <button type="submit" class="btn btn-primary">➕ 创建用户</button>
+            </form>
+        </div>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <div class="search-box">
+                <form method="GET" action="{{ url_for('admin_members') }}" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="text" name="search" class="search-input" placeholder="搜索账号..." value="{{ search or '' }}">
+                    <button type="submit" class="btn btn-secondary">🔍 搜索</button>
+                    {% if search %}
+                    <a href="{{ url_for('admin_members') }}" class="btn btn-secondary">清除</a>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="batch-actions">
+                <span class="selected-count">已选择 <span id="selectedCount">0</span> 个用户</span>
+                <button class="btn btn-danger" id="btnDisable" onclick="batchAction('disable')" disabled>禁用</button>
+                <button class="btn btn-success" id="btnEnable" onclick="batchAction('enable')" disabled>启用</button>
+                <button class="btn btn-secondary" id="btnResetPwd" onclick="batchResetPassword()" disabled>重置密码</button>
+                <button class="btn btn-danger" id="btnDelete" onclick="batchAction('delete')" disabled>删除会员</button>
+            </div>
+        </div>
+
+        <!-- 用户表格 -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"><input type="checkbox" class="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                        <th>账号</th>
+                        <th>手机号</th>
+                        <th>角色</th>
+                        <th>状态</th>
+                        <th>今日分析次数</th>
+                        <th>注册时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr data-username="{{ member.username }}" data-role="{{ member.role }}" data-status="{{ member.status }}">
+                        <td>
+                            {% if member.username != session.username %}
+                            <input type="checkbox" class="checkbox user-checkbox" value="{{ member.username }}" onclick="updateSelectedCount()">
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ member.username }}</strong></td>
+                        <td class="text-muted">{{ member.phone or '-' }}</td>
+                        <td>
+                            {% if member.role == 'admin' %}
+                            <span class="badge badge-admin">管理员</span>
+                            {% else %}
+                            <span class="badge badge-trial">会员</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if member.status == 1 %}
+                            <span class="badge badge-enabled">启用</span>
+                            {% else %}
+                            <span class="badge badge-disabled">禁用</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if member.last_analysis_date == now_dt.strftime('%Y-%m-%d') %}
+                            <span class="badge badge-enabled">{{ member.daily_analysis_count or 0 }} 次</span>
+                            {% else %}
+                            <span class="badge badge-trial">未登录</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ member.created_at[:10] }}</td>
+                        <td>
+                            <span class="text-muted">-</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- 分页 -->
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="{{ url_for('admin_members', page=page-1, search=search) }}" class="page-link">←</a>
+                {% endif %}
+                
+                <span class="page-info">第 {{ page }} / {{ total_pages }} 页 (共 {{ total }} 人)</span>
+                
+                {% if page < total_pages %}
+                <a href="{{ url_for('admin_members', page=page+1, search=search) }}" class="page-link">→</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 重置密码 Modal -->
+    <div class="modal" id="resetModal">
+        <div class="modal-content">
+            <h3 class="modal-title">🔐 批量重置密码</h3>
+            <form method="POST" id="resetForm" action="">
+                <div class="modal-form-group">
+                    <label class="modal-label">新密码（将应用于选中的 <span id="resetCount">0</span> 个用户）</label>
+                    <input type="password" name="new_password" class="modal-input" placeholder="输入新密码（不少于6位）" required minlength="6" id="resetPassword">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeResetModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">确认重置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 批量操作表单（隐藏） -->
+    <form id="batchForm" method="POST" style="display: none;">
+        <input type="hidden" name="usernames" id="batchUsernames">
+        <input type="hidden" name="action" id="batchAction">
+    </form>
+
+    <script>
+        // 获取所有选中的用户
+        function getSelectedUsers() {
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // 更新选中计数和按钮状态
+        function updateSelectedCount() {
+            const selected = getSelectedUsers();
+            const count = selected.length;
+            document.getElementById('selectedCount').textContent = count;
+            
+            // 更新按钮状态
+            const hasSelection = count > 0;
+            document.getElementById('btnDisable').disabled = !hasSelection;
+            document.getElementById('btnEnable').disabled = !hasSelection;
+            document.getElementById('btnResetPwd').disabled = !hasSelection;
+            document.getElementById('btnDelete').disabled = !hasSelection;
+            
+            // 高亮选中行
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const checkbox = row.querySelector('.user-checkbox');
+                if (checkbox && checkbox.checked) {
+                    row.classList.add('selected');
+                } else {
+                    row.classList.remove('selected');
+                }
+            });
+        }
+
+        // 全选/取消全选
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            updateSelectedCount();
+        }
+
+        // 批量操作
+        function batchAction(action) {
+            const users = getSelectedUsers();
+            if (users.length === 0) return;
+            
+            const actionNames = {
+                'disable': '禁用',
+                'enable': '启用',
+                'delete': '删除'
+            };
+            
+            // 删除操作需要额外确认
+            if (action === 'delete') {
+                if (!confirm(`⚠️ 警告：确定要删除选中的 ${users.length} 个用户吗？\n\n此操作不可恢复，用户的所有数据将被永久删除！`)) {
+                    return;
+                }
+            } else if (!confirm(`确定要对选中的 ${users.length} 个用户执行【${actionNames[action]}】操作吗？`)) {
+                return;
+            }
+            
+            document.getElementById('batchUsernames').value = users.join(',');
+            document.getElementById('batchAction').value = action;
+            document.getElementById('batchForm').action = '/xwx422/members/batch';
+            document.getElementById('batchForm').submit();
+        }
+
+        // 批量重置密码
+        function batchResetPassword() {
+            const users = getSelectedUsers();
+            if (users.length === 0) return;
+            
+            document.getElementById('resetCount').textContent = users.length;
+            document.getElementById('batchUsernames').value = users.join(',');
+            document.getElementById('resetModal').classList.add('active');
+        }
+
+        // 关闭重置密码弹窗
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.remove('active');
+            document.getElementById('resetPassword').value = '';
+        }
+
+        // 提交重置密码
+        document.getElementById('resetForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const users = getSelectedUsers();
+            const password = document.getElementById('resetPassword').value;
+            
+            document.getElementById('batchUsernames').value = users.join(',');
+            document.getElementById('batchAction').value = 'reset_password:' + password;
+            document.getElementById('batchForm').action = '/xwx422/members/batch';
+            document.getElementById('batchForm').submit();
+        });
+
+        // 点击 Modal 外部关闭
+        document.getElementById('resetModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeResetModal();
+            }
+        });
+    </script>
+</body>
+</html>

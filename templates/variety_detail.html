@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ variety.variety_name }} - 详情</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-yellow: #d29922;
+            --neon-purple: #a371f7;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            padding: 1rem;
+        }
+
+        /* 头部概览 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+        .header-left { flex: 1; }
+        .header-title { font-size: 1.25rem; font-weight: 700; }
+        .header-meta { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; }
+        .header-tags { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+        .tag {
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+        .tag.long { background: rgba(248,81,73,0.12); color: var(--neon-red); border-color: rgba(248,81,73,0.3); }
+        .tag.short { background: rgba(63,185,80,0.12); color: var(--neon-green); border-color: rgba(63,185,80,0.3); }
+        .tag.neutral { background: rgba(139,148,158,0.12); color: var(--text-secondary); border-color: rgba(139,148,158,0.3); }
+        .tag.blue { background: rgba(88,166,255,0.12); color: var(--neon-blue); border-color: rgba(88,166,255,0.3); }
+        .tag.purple { background: rgba(163,113,247,0.12); color: var(--neon-purple); border-color: rgba(163,113,247,0.3); }
+
+        .header-right { text-align: center; min-width: 90px; }
+        .prob-value {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .prob-value.high { color: var(--neon-green); }
+        .prob-value.medium { color: var(--neon-yellow); }
+        .prob-value.low { color: var(--neon-red); }
+        .prob-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        /* 卡片通用 */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-bottom: 0.875rem;
+        }
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        /* 诊断条 */
+        .diagnosis {
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 0.875rem;
+            border: 1px solid transparent;
+        }
+        .diagnosis.long { background: rgba(248,81,73,0.08); border-color: rgba(248,81,73,0.25); color: #f5b5b0; }
+        .diagnosis.short { background: rgba(63,185,80,0.08); border-color: rgba(63,185,80,0.25); color: #a5d6a7; }
+        .diagnosis.neutral { background: rgba(139,148,158,0.08); border-color: rgba(139,148,158,0.25); color: var(--text-secondary); }
+
+        /* Grid */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.875rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .grid-5 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* 技术指标小块 */
+        .metric-box {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 0.625rem 0.5rem;
+            text-align: center;
+        }
+        .metric-name { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .metric-status { font-size: 0.8rem; font-weight: 600; }
+        .metric-detail { font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.15rem; }
+
+        /* 信息行 */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(48,54,61,0.4);
+            font-size: 0.8125rem;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-secondary); }
+        .info-value { font-weight: 500; text-align: right; }
+        .info-value.mono { font-family: monospace; font-weight: 600; }
+
+        /* 颜色 */
+        .up { color: var(--neon-red); }
+        .down { color: var(--neon-green); }
+        .neutral { color: var(--text-muted); }
+        .blue { color: var(--neon-blue); }
+        .purple { color: var(--neon-purple); }
+
+        /* 进度条 */
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-elevated);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.375rem;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        /* 适合度 */
+        .suit-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+        .suit-tag {
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .suit-tag.beginner { background: rgba(63,185,80,0.15); color: var(--neon-green); }
+        .suit-tag.intermediate { background: rgba(210,153,34,0.15); color: var(--neon-yellow); }
+        .suit-tag.professional { background: rgba(248,81,73,0.15); color: var(--neon-red); }
+        .suit-tag.inactive { opacity: 0.35; background: var(--bg-elevated); color: var(--text-muted); }
+
+        /* 风险提示 */
+        .risk-alert {
+            margin-bottom: 0.875rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid;
+            font-size: 0.8125rem;
+        }
+        .risk-alert.danger { border-color: var(--neon-red); background: rgba(248,81,73,0.08); color: var(--neon-red); }
+        .risk-alert.warning { border-color: var(--neon-yellow); background: rgba(210,153,34,0.08); color: var(--neon-yellow); }
+
+        /* 理由 */
+        .reason-box {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            font-size: 0.8125rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        /* 信号条 */
+        .signal-bars { display: inline-flex; gap: 2px; vertical-align: middle; margin-left: 0.375rem; }
+        .signal-bar { width: 3px; height: 10px; background: var(--bg-elevated); border-radius: 1px; }
+        .signal-bar.active { background: var(--neon-blue); }
+        .up .signal-bar.active { background: var(--neon-red); }
+        .down .signal-bar.active { background: var(--neon-green); }
+        .neutral .signal-bar.active { background: var(--text-muted); }
+
+        /* 空状态 */
+        .empty-state { color: var(--text-muted); font-style: italic; font-size: 0.8125rem; padding: 0.5rem 0; }
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 0 0.45rem 0;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-color);
+            letter-spacing: 0.03em;
+        }
+        .section-divider::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            border-radius: 2px;
+        }
+        .s-trend { color: #c4b5fd; border-bottom-color: rgba(167,139,250,0.35); }
+        .s-trend::before { background: #a78bfa; box-shadow: 0 0 6px rgba(167,139,250,0.4); }
+        .s-predict { color: #86efac; border-bottom-color: rgba(74,222,128,0.35); }
+        .s-predict::before { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,0.4); }
+        .s-status { color: #93c5fd; border-bottom-color: rgba(96,165,250,0.35); }
+        .s-status::before { background: #60a5fa; box-shadow: 0 0 6px rgba(96,165,250,0.4); }
+        .s-risk { color: #fcd34d; border-bottom-color: rgba(251,191,36,0.35); }
+        .s-risk::before { background: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,0.4); }
+    </style>
+</head>
+<body>
+
+    <!-- 换月风险提示 -->
+    {% if variety.rollover_info and variety.rollover_info.is_rollover_period %}
+    <div class="risk-alert {{ 'danger' if variety.rollover_info.warning_level == 'danger' else 'warning' }}">
+        <strong>⚠️ 换月风险：</strong>{{ variety.rollover_info.message }} | 合约: {{ variety.rollover_info.contract_month }} | 距交割: {{ variety.rollover_info.days_to_delivery }}天
+    </div>
+    {% endif %}
+
+    <!-- 头部概览 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-title">{{ variety.variety_name }} <span style="font-size:0.875rem;color:var(--text-muted);font-weight:500;">{{ variety.variety_code }}</span></div>
+            <div class="header-meta">{{ variety.main_contract_clean or '主力合约' }} | 更新于 {{ variety.run_time }}</div>
+            <div class="header-tags">
+                <span class="tag {{ 'long' if variety.trade_direction == '做多' else 'short' if variety.trade_direction == '做空' else 'neutral' }}">{{ variety.trade_direction or '观望' }}</span>
+                <span class="tag blue">波动 {{ "%.2f"|format((variety.atr_ratio or 0) * 100) }}%</span>
+            </div>
+        </div>
+        <div class="header-right">
+            {% set tier = variety.signal_tier or '等待' %}
+            <div class="prob-value" style="color:{% if tier=='布局' %}#10b981{% elif tier=='关注' %}#3b82f6{% else %}#6b7280{% endif %};">
+                {% if tier == '布局' %}🔥 布局{% elif tier == '关注' %}👀 关注{% else %}⏸ 等待{% endif %}
+            </div>
+            <div class="prob-label">实战信号等级</div>
+        </div>
+    </div>
+
+    <!-- 📈 趋势分析 -->
+    <div class="section-divider s-trend">📈 趋势分析 — AI对当前行情的方向判断与多空信号</div>
+    <!-- 信号评级拆解 -->
+    <div class="card">
+        <div class="card-title">🎯 实战信号等级</div>
+        {% set tier = variety.signal_tier or '等待' %}
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; text-align: center;">
+            <div style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 0.6rem;">
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--neon-blue);">{{ variety.fund_probability or 0 }}</div>
+                <div style="font-size: 0.65rem; color: var(--text-muted);">资金面概率</div>
+            </div>
+            <div style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 0.6rem;">
+                <div style="font-size: 1.1rem; font-weight: 700; color: {% if tier == '布局' %}#10b981{% elif tier == '关注' %}#3b82f6{% else %}#6b7280{% endif %};">
+                    {% if tier == '布局' %}🔥 布局{% elif tier == '关注' %}👀 关注{% else %}⏸ 等待{% endif %}
+                </div>
+                <div style="font-size: 0.65rem; color: var(--text-muted);">实战信号等级</div>
+            </div>
+            <div style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 0.6rem;">
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--neon-green);">{{ variety.continuation_prob or 0 }}%</div>
+                <div style="font-size: 0.65rem; color: var(--text-muted);">趋势持续概率</div>
+            </div>
+        </div>
+        {% if variety.signal_tier == '等待' %}
+        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--neon-yellow);">
+            ⚠️ 当前为等待信号，不建议开仓。
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- AI 综合诊断 -->
+    {% set diag_class = 'long' if variety.trade_direction == '做多' else 'short' if variety.trade_direction == '做空' else 'neutral' %}
+    {% set diag_icon = '⬆' if variety.trade_direction == '做多' else '⬇' if variety.trade_direction == '做空' else '⏸' %}
+    <div class="diagnosis {{ diag_class }}">
+        <div style="font-weight:700;margin-bottom:0.25rem;">{{ diag_icon }} AI综合诊断</div>
+        <div style="font-size:0.8125rem;">
+            {{ variety.timeframe_confluence or '多周期数据暂缺' }} |
+            {% if variety.trade_direction == '做多' %}AI判断趋势偏多，建议回调入场。
+            {% elif variety.trade_direction == '做空' %}AI判断趋势偏空，建议反弹入场。
+            {% else %}当前多空信号均不明朗，建议保持观望。{% endif %}
+        </div>
+    </div>
+
+    <!-- 趋势预判卡片 -->
+    <div class="card" style="border-left:3px solid {{ variety.pre_trend_color or 'gray' }}">
+        <div class="card-title">🔮 趋势预判
+            <span style="margin-left: auto; font-size: 1.1rem; font-weight: 700; color: var(--{{ variety.pre_trend_color or 'gray' }}-color, {{ {'green':'#3fb950','blue':'#58a6ff','yellow':'#d29922','red':'#f85149','gray':'#6e7681'}.get(variety.pre_trend_color or 'gray', '#6e7681') }});">
+                {{ variety.pre_trend_score or 0 }}分
+            </span>
+        </div>
+
+        {% if variety.pre_trend_veto %}
+        <div style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;">
+            <div style="font-weight:700;color:var(--neon-red);margin-bottom:0.5rem;">🔴 预判否决 - 当前不适合入场</div>
+            {% for reason in (variety.pre_trend_veto_reasons or []) %}
+            <div style="font-size:0.75rem;color:#f5b5b0;margin-bottom:0.25rem;">• {{ reason }}</div>
+            {% endfor %}
+            <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.5rem;">💡 建议等待否决条件解除后再关注</div>
+        </div>
+        {% else %}
+        <div class="grid-2" style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:0.75rem;">
+            <div class="metric-box">
+                <div class="metric-name">趋势早期度</div>
+                <div class="metric-status" style="color:{{ '#3fb950' if variety.pre_trend_early_bird > 0.7 else '#d29922' if variety.pre_trend_early_bird > 0.4 else '#f85149' }}">
+                    {{ "%.0f"|format(variety.pre_trend_early_bird * 100) if variety.pre_trend_early_bird else 50 }}%
+                </div>
+                <div class="metric-detail">{{ '初期信号' if variety.pre_trend_early_bird and variety.pre_trend_early_bird > 0.7 else '成长期' if variety.pre_trend_early_bird and variety.pre_trend_early_bird > 0.4 else '后期' }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">资金确认度</div>
+                <div class="metric-status" style="color:{{ '#3fb950' if variety.pre_trend_capital > 0.7 else '#d29922' if variety.pre_trend_capital > 0.4 else '#f85149' }}">
+                    {{ "%.0f"|format(variety.pre_trend_capital * 100) if variety.pre_trend_capital else 50 }}%
+                </div>
+                <div class="metric-detail">{{ '资金配合' if variety.pre_trend_capital and variety.pre_trend_capital > 0.6 else '资金一般' }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">位置安全度</div>
+                <div class="metric-status" style="color:{{ '#3fb950' if variety.pre_trend_safety > 0.7 else '#d29922' if variety.pre_trend_safety > 0.4 else '#f85149' }}">
+                    {{ "%.0f"|format(variety.pre_trend_safety * 100) if variety.pre_trend_safety else 50 }}%
+                </div>
+                <div class="metric-detail">{{ '安全' if variety.pre_trend_safety and variety.pre_trend_safety > 0.7 else '中等' if variety.pre_trend_safety and variety.pre_trend_safety > 0.4 else '危险' }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">盈亏比系数</div>
+                <div class="metric-status" style="color:{{ '#3fb950' if variety.pre_trend_rr_coef > 1.2 else '#d29922' if variety.pre_trend_rr_coef > 0.8 else '#f85149' }}">
+                    {{ "%.1f"|format(variety.pre_trend_rr_coef) if variety.pre_trend_rr_coef else '1.0' }}
+                </div>
+                <div class="metric-detail">{{ '优秀' if variety.pre_trend_rr_coef and variety.pre_trend_rr_coef > 1.2 else '良好' if variety.pre_trend_rr_coef and variety.pre_trend_rr_coef > 0.8 else '较差' }}</div>
+            </div>
+        </div>
+
+        {% if variety.pre_trend_room_desc %}
+        <div style="margin-top:0.5rem;padding:0.5rem;background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.2);border-radius:8px;font-size:0.75rem;">
+            <div style="font-weight:600;color:var(--neon-blue);margin-bottom:0.25rem;">📏 趋势空间评估</div>
+            <div style="color:var(--text-secondary);">{{ variety.pre_trend_room_desc }}</div>
+            {% if variety.pre_trend_move_atr and variety.pre_trend_move_atr > 0 %}
+            <div style="margin-top:0.25rem;display:flex;gap:1rem;font-size:0.7rem;color:var(--text-muted);">
+                <span>已走 {{ "%.1f"|format(variety.pre_trend_move_atr) }} ATR</span>
+                <span>剩余约 {{ "%.1f"|format(variety.pre_trend_remaining_atr) }} ATR</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if variety.pre_trend_entry_low and variety.pre_trend_entry_low > 0 %}
+        <div style="font-size:0.75rem;color:var(--text-secondary);padding:0.5rem;background:var(--bg-elevated);border-radius:8px;">
+            <span style="font-weight:600;">🎯 建议入场区:</span>
+            {{ variety.pre_trend_entry_low }} - {{ variety.pre_trend_entry_high }}
+            <span style="margin-left:0.5rem;">🛑 止损:</span> {{ variety.pre_trend_stop }}
+            <span style="margin-left:0.5rem;">🏁 目标:</span> {{ variety.pre_trend_target or '移动止损' }}
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- 📊 现状分析 -->
+    <div class="section-divider s-status">📊 现状分析 — 当前已发生的客观数据与指标</div>
+    <!-- 期限结构 -->
+    <div class="card">
+        <div class="card-title">📐 期限结构</div>
+        {% if variety.spread_data %}
+        <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+            <div class="metric-box">
+                <div class="metric-name">主力价格</div>
+                <div class="metric-status neutral">{{ variety.spread_data.main_price }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">次主力价格</div>
+                <div class="metric-status neutral">{{ variety.spread_data.secondary_price }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">跨期价差</div>
+                <div class="metric-status {{ 'up' if variety.spread_data.spread > 0 else 'down' }}">{{ variety.spread_data.spread }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">年化展期收益率</div>
+                <div class="metric-status {{ 'up' if variety.spread_data.annualized_roll_yield > 0 else 'down' if variety.spread_data.annualized_roll_yield < 0 else 'neutral' }}">{{ "%.2f"|format(variety.spread_data.annualized_roll_yield) }}%</div>
+            </div>
+        </div>
+        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+            {% if variety.spread_data.annualized_roll_yield < -5 %}
+            当前为<strong>深贴水</strong>结构，远期大幅升水，需警惕空头力量累积或供需宽松预期。
+            {% elif variety.spread_data.annualized_roll_yield > 5 %}
+            当前为<strong>高升水</strong>结构，远期大幅贴水，通常反映现货紧张或多头主导。
+            {% else %}
+            期限结构相对平稳，跨期价差处于正常区间。
+            {% endif %}
+        </div>
+        {% else %}
+        <div style="font-size: 0.8125rem; color: var(--text-secondary);">
+            📐 <strong>期限结构数据更新中</strong><br>
+            跨期价差数据每日自动更新（Celery Beat 定时任务）。若刚启动系统，数据可能尚未同步，通常 10~30 分钟内会自动填充。<br>
+            <span style="color: var(--text-muted);">管理员可在「任务健康监控」页面查看更新进度。</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 技术指标 -->
+    <div class="card">
+        <div class="card-title">📊 技术指标</div>
+        {% if variety.tech_indicators %}
+        {% set ti = variety.tech_indicators %}
+        <div class="grid-4">
+            <div class="metric-box">
+                <div class="metric-name">MACD</div>
+                <div class="metric-status {{ 'up' if '金叉' in (ti.macd.macd_signal or '') else 'down' if '死叉' in (ti.macd.macd_signal or '') else 'neutral' }}">{{ ti.macd.macd_signal or 'N/A' }}</div>
+                {% if ti.macd.macd_histogram is not none %}
+                <div class="metric-detail">柱: {{ "%.2f"|format(ti.macd.macd_histogram) }}</div>
+                {% endif %}
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">RSI</div>
+                <div class="metric-status {{ 'up' if (ti.rsi.rsi_value or 0) > 60 else 'down' if (ti.rsi.rsi_value or 0) < 40 else 'neutral' }}">{{ "%.1f"|format(ti.rsi.rsi_value) if ti.rsi.rsi_value is not none else 'N/A' }}</div>
+                <div class="metric-detail">{{ ti.rsi.rsi_signal or '' }} {{ ti.rsi.rsi_trend or '' }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">KDJ</div>
+                <div class="metric-status {{ 'up' if '金叉' in (ti.kdj.kdj_signal or '') else 'down' if '死叉' in (ti.kdj.kdj_signal or '') else 'neutral' }}">{{ ti.kdj.kdj_signal or 'N/A' }}</div>
+                {% if ti.kdj.j_value is not none %}
+                <div class="metric-detail">J: {{ "%.1f"|format(ti.kdj.j_value) }}</div>
+                {% endif %}
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">布林带</div>
+                <div class="metric-status {{ 'up' if '上轨' in (ti.bollinger.bb_signal or '') else 'down' if '下轨' in (ti.bollinger.bb_signal or '') else 'neutral' }}">{{ ti.bollinger.bb_signal or 'N/A' }}</div>
+                {% if ti.bollinger.bandwidth is not none %}
+                <div class="metric-detail">带宽 {{ "%.2f"|format(ti.bollinger.bandwidth) }}%</div>
+                {% endif %}
+            </div>
+        </div>
+        {% if variety.trend_info %}
+        <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border-color);">
+            <div class="info-row">
+                <span class="info-label">趋势评分</span>
+                <span class="info-value">
+                    {{ variety.trend_info.trend_score or 0 }}/100
+                    <span class="signal-bars">
+                        {% set active = ((variety.trend_info.trend_score or 0) / 20) | int %}
+                        {% set bar_cls = 'up' if '多头' in variety.trend_info.direction else 'down' if '空头' in variety.trend_info.direction else 'neutral' %}
+                        {% for i in range(5) %}<div class="signal-bar {{ 'active ' + bar_cls if i < active }}"></div>{% endfor %}
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">均线排列</span>
+                <span class="info-value mono">MA10: {{ "%.0f"|format(variety.trend_info.ma_short) if variety.trend_info.ma_short else 'N/A' }} | MA30: {{ "%.0f"|format(variety.trend_info.ma_long) if variety.trend_info.ma_long else 'N/A' }}</span>
+            </div>
+            {% if variety.trend_info.is_golden_cross %}
+            <div class="info-row"><span class="info-label">特殊信号</span><span class="info-value up">🔔 刚刚形成金叉</span></div>
+            {% elif variety.trend_info.is_dead_cross %}
+            <div class="info-row"><span class="info-label">特殊信号</span><span class="info-value down">🔔 刚刚形成死叉</span></div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state">技术指标数据暂不可用</div>
+        {% endif %}
+    </div>
+
+    <!-- 基差分析 -->
+    <div class="card">
+        <div class="card-title">📊 基差分析</div>
+        {% if variety.basis_data %}
+        <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+            <div class="metric-box">
+                <div class="metric-name">现货价格</div>
+                <div class="metric-status neutral">{{ variety.basis_data.spot_price }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">基差</div>
+                <div class="metric-status {{ 'up' if (variety.basis_data and variety.basis_data.basis is not none and variety.basis_data.basis > 0) else 'down' }}">{{ variety.basis_data.basis if variety.basis_data and variety.basis_data.basis is not none else 'N/A' }}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">基差率</div>
+                <div class="metric-status {{ 'up' if (variety.basis_data and variety.basis_data.basis_rate is not none and variety.basis_data.basis_rate > 0) else 'down' }}">{{ "%.2f"|format(variety.basis_data.basis_rate) if variety.basis_data and variety.basis_data.basis_rate is not none else 'N/A' }}%</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-name">分位数</div>
+                <div class="metric-status {{ 'up' if (variety.basis_data and variety.basis_data.basis_percentile is not none and variety.basis_data.basis_percentile > 80) else 'down' if (variety.basis_data and variety.basis_data.basis_percentile is not none and variety.basis_data.basis_percentile < 20) else 'neutral' }}">{{ variety.basis_data.basis_percentile if variety.basis_data and variety.basis_data.basis_percentile is not none else 'N/A' }}%</div>
+            </div>
+        </div>
+        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+            基差分位数解读：
+            {% if variety.basis_data and variety.basis_data.basis_percentile is not none and variety.basis_data.basis_percentile > 80 %}
+            <span style="color: var(--neon-red);">🔴 高分位数 ({{ variety.basis_data.basis_percentile if variety.basis_data and variety.basis_data.basis_percentile is not none else 'N/A' }}%)：基差偏高，考虑做空期货+做多现货</span>
+            {% elif variety.basis_data and variety.basis_data.basis_percentile is not none and variety.basis_data.basis_percentile < 20 %}
+            <span style="color: var(--neon-green);">🟢 低分位数 ({{ variety.basis_data.basis_percentile if variety.basis_data and variety.basis_data.basis_percentile is not none else 'N/A' }}%)：基差偏低，考虑做多期货+做空现货</span>
+            {% else %}
+            <span>🟡 中性区间 ({{ variety.basis_data.basis_percentile if variety.basis_data and variety.basis_data.basis_percentile is not none else 'N/A' }}%)：基差处于正常范围</span>
+            {% endif %}
+        </div>
+        {% else %}
+        <div style="font-size: 0.8125rem; color: var(--text-secondary);">
+            📊 <strong>基差数据更新中</strong><br>
+            基差数据每日自动更新（Celery Beat 定时任务）。若刚启动系统，数据可能尚未同步，通常 10~30 分钟内会自动填充。<br>
+            <span style="color: var(--text-muted);">管理员可在「任务健康监控」页面查看更新进度。</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 资金与量价分析 -->
+    <div class="card">
+        <div class="card-title">💰 资金与量价分析</div>
+        <div class="grid-2">
+            <div>
+                {% if variety.fund_analysis %}
+                {% set fa = variety.fund_analysis %}
+                <div class="info-row">
+                    <span class="info-label">资金总体</span>
+                    <span class="info-value {{ 'up' if (fa.bias or '') == '偏多' else 'down' if (fa.bias or '') == '偏空' else 'neutral' }}">{{ fa.overall or 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">资金评分</span>
+                    <span class="info-value">{{ fa.score or 0 }}/100</span>
+                </div>
+                {% if fa.oi_analysis %}
+                <div class="info-row">
+                    <span class="info-label">持仓信号</span>
+                    <span class="info-value {{ 'up' if fa.oi_analysis.strength > 60 else 'down' if fa.oi_analysis.strength < 40 else 'neutral' }}">{{ fa.oi_analysis.signal or 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">持仓变化</span>
+                    <span class="info-value mono {{ 'up' if (fa.oi_analysis.oi_change_pct or 0) > 0 else 'down' }}">{{ "+%.1f"|format(fa.oi_analysis.oi_change_pct) if (fa.oi_analysis.oi_change_pct or 0) > 0 else "%.1f"|format(fa.oi_analysis.oi_change_pct) }}%</span>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="empty-state">资金分析暂不可用</div>
+                {% endif %}
+            </div>
+            <div>
+                {% if variety.volume_analysis %}
+                {% set va = variety.volume_analysis %}
+                <div class="info-row">
+                    <span class="info-label">量价信号</span>
+                    <span class="info-value">{{ va.signal or 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">量比</span>
+                    <span class="info-value mono {{ 'up' if (va.volume_ratio or 1) > 1.2 else 'down' if (va.volume_ratio or 1) < 0.8 else 'neutral' }}">{{ "%.2f"|format(va.volume_ratio or 1) }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">持仓变化(OI)</span>
+                    <span class="info-value mono {{ 'up' if (va.oi_change or 0) > 0 else 'down' }}">{{ "+%.2f"|format(va.oi_change) if (va.oi_change or 0) > 0 else "%.2f"|format(va.oi_change) }}%</span>
+                </div>
+                {% else %}
+                <div class="empty-state">量价分析暂不可用</div>
+                {% endif %}
+                {% if variety.fund_analysis and variety.fund_analysis.money_flow %}
+                <div class="info-row">
+                    <span class="info-label">资金流向</span>
+                    <span class="info-value">{{ variety.fund_analysis.money_flow.signal or 'N/A' }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 多周期共振 -->
+    <div class="card">
+        <div class="card-title">⏱️ 多周期共振</div>
+        {% if variety.timeframe_analysis %}
+        <div class="grid-5">
+            {% for tf_name, tf_data in variety.timeframe_analysis.items() %}
+            {% set tf_type = 'up' if '多' in tf_data.direction else 'down' if '空' in tf_data.direction else 'neutral' %}
+            <div class="metric-box">
+                <div class="metric-name">{{ tf_name.upper() }}</div>
+                <div class="metric-status {{ tf_type }}">{{ '看多' if tf_type == 'up' else '看空' if tf_type == 'down' else '观望' }}</div>
+                {% if tf_data.trend %}<div class="metric-detail">{{ tf_data.trend }}</div>{% endif %}
+                {% if tf_data.price_action %}
+                    {% set pa = tf_data.price_action %}
+                    {% if pa.fake_breakout %}<div class="metric-detail" style="color:var(--neon-yellow);">⚠️ 假突破</div>{% endif %}
+                    {% if pa.breakout and not pa.fake_breakout %}<div class="metric-detail" style="color:var(--neon-blue);">↗ 突破</div>{% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% if variety.timeframe_confluence %}
+        <div style="margin-top:0.625rem;padding-top:0.625rem;border-top:1px solid var(--border-color);font-size:0.8125rem;color:var(--neon-blue);font-weight:500;">
+            周期共振结论：{{ variety.timeframe_confluence }}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state">多周期数据暂不可用</div>
+        {% endif %}
+    </div>
+
+    <!-- 投资者适合度 -->
+    {% if variety.suitability %}
+    <div class="card">
+        <div class="card-title">👤 投资者适合度</div>
+        <div class="suit-tags">
+            {% set types = variety.suitability.investor_types or [] %}
+            <span class="suit-tag {{ 'beginner' if 'beginner' in types else 'inactive' }}">新手</span>
+            <span class="suit-tag {{ 'intermediate' if 'intermediate' in types else 'inactive' }}">进阶</span>
+            <span class="suit-tag {{ 'professional' if 'professional' in types else 'inactive' }}">专业</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">风险等级</span>
+            <span class="info-value">{{ variety.suitability.risk_level or '中等' }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">适合周期</span>
+            <span class="info-value">{{ variety.suitability.timeframe or '波段/趋势' }}</span>
+        </div>
+        {% if variety.suitability.reason %}
+        <div style="margin-top:0.5rem;font-size:0.8125rem;color:var(--text-secondary);line-height:1.6;">
+            {{ variety.suitability.reason }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- 1手盈亏分析（新手验证系统） -->
+    <div class="card">
+        <div class="card-title">💰 1手盈亏分析</div>
+        {% if variety.position_info %}
+        {% set pi = variety.position_info %}
+        <div class="grid-2">
+            <div class="info-row" style="border-bottom:none;">
+                <span class="info-label">固定手数</span>
+                <span class="info-value mono blue">1手</span>
+            </div>
+            <div class="info-row" style="border-bottom:none;">
+                <span class="info-label">1手保证金</span>
+                <span class="info-value mono">¥{{ "%.0f"|format(pi.margin_per_lot) }}</span>
+            </div>
+            <div class="info-row" style="border-bottom:none;">
+                <span class="info-label">入场价</span>
+                <span class="info-value mono">{{ "%.1f"|format(pi.entry_price) }}</span>
+            </div>
+            {% if pi.suggested_entry and pi.suggested_entry != pi.entry_price %}
+            <div class="info-row" style="border-bottom:none;">
+                <span class="info-label">建议回调入场</span>
+                <span class="info-value mono" style="color: var(--neon-blue);">{{ "%.1f"|format(pi.suggested_entry) }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row" style="border-bottom:none;">
+                <span class="info-label">止损价</span>
+                <span class="info-value mono down">{{ "%.1f"|format(pi.stop_loss) }}</span>
+            </div>
+            <div class="info-row" style="border-bottom:none;">
+                <span class="info-label">结构目标位</span>
+                <span class="info-value mono up">{{ "%.1f"|format(pi.structure_target) if pi.structure_target else '—' }}</span>
+            </div>
+            {% if pi.reversal_condition %}
+            <div class="info-row" style="border-bottom:none;">
+                <span class="info-label">反转条件</span>
+                <span class="info-value" style="color: var(--neon-yellow); font-size: 0.8rem;">⚠️ {{ pi.reversal_condition }}</span>
+            </div>
+            {% endif %}
+            {% if variety.continuation_prob %}
+            <div class="info-row" style="border-bottom:none;">
+                <span class="info-label">趋势持续概率</span>
+                <span class="info-value mono" style="color: {% if variety.continuation_prob >= 65 %}#10b981{% elif variety.continuation_prob >= 50 %}#3b82f6{% elif variety.continuation_prob >= 30 %}#f59e0b{% else %}#ef4444{% endif %};">{{ variety.continuation_prob }}%</span>
+            </div>
+            {% endif %}
+        </div>
+        {% if pi.risk_reward_ratio %}
+        <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+            <div style="text-align:center; padding: 0.5rem; background: rgba(59,130,246,0.08); border-radius: 8px;">
+                <div style="font-size: 0.7rem; color: var(--text-muted);">盈亏比(1:{{ pi.risk_reward_ratio }})</div>
+            </div>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state">暂无盈亏数据</div>
+        {% endif %}
+    </div>
+
+    <!-- ⛔ 交易风控 -->
+    <div class="section-divider s-risk">⛔ 交易风控 — 按当前方向计算的入场/止损/仓位建议</div>
+    <!-- 交易计划 -->
+    {% if variety.trade_direction and variety.trade_direction != '观望' %}
+    <div class="card">
+        <div class="card-title">📋 交易计划</div>
+        <div style="padding: 0.5rem 0.75rem; background: rgba(139,148,158,0.06); border-radius: 6px; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.75rem;">
+            基于AI分析生成的交易方案，固定1手验证，请结合自身风险承受能力审慎决策。
+        </div>
+        <div class="grid-2">
+            <div>
+                {% if variety.entry_price %}
+                <div class="info-row"><span class="info-label">建议入场价</span><span class="info-value mono">{{ "%.0f"|format(variety.entry_price) }}</span></div>
+                {% endif %}
+                {% if variety.stop_loss %}
+                <div class="info-row"><span class="info-label">止损价位</span><span class="info-value mono down">{{ "%.0f"|format(variety.stop_loss) }}</span></div>
+                {% endif %}
+                {% if variety.target_price %}
+                <div class="info-row"><span class="info-label">目标价位</span><span class="info-value mono up">{{ "%.0f"|format(variety.target_price) }}</span></div>
+                {% endif %}
+            </div>
+            <div>
+                {% set sr = variety.support_resistance or {} %}
+                <div class="info-row" style="border-bottom:none;">
+                    <span class="info-label">当前价格</span>
+                    <span class="info-value mono blue">{{ "%.0f"|format(sr.current_price) if sr.current_price else 'N/A' }}</span>
+                </div>
+                {% if sr.nearest_support is not none %}
+                <div class="info-row" style="border-bottom:none;">
+                    <span class="info-label">最近支撑</span>
+                    <span class="info-value mono down">{{ "%.0f"|format(sr.nearest_support) }} ({{ "%.2f"|format((sr.support_distance_pct or 0)*100) }}%)</span>
+                </div>
+                {% endif %}
+                {% if sr.supports %}
+                <div style="margin-top:0.25rem;font-size:0.75rem;color:var(--text-muted);">
+                    支撑位: {% for s in sr.supports %}{{ "%.0f"|format(s) }}{% if not loop.last %} / {% endif %}{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div>
+                {% if sr.nearest_resistance is not none %}
+                <div class="info-row" style="border-bottom:none;">
+                    <span class="info-label">最近阻力</span>
+                    <span class="info-value mono up">{{ "%.0f"|format(sr.nearest_resistance) }} ({{ "%.2f"|format((sr.resistance_distance_pct or 0)*100) }}%)</span>
+                </div>
+                {% endif %}
+                {% if sr.resistances %}
+                <div style="margin-top:0.25rem;font-size:0.75rem;color:var(--text-muted);">
+                    阻力位: {% for r in sr.resistances %}{{ "%.0f"|format(r) }}{% if not loop.last %} / {% endif %}{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">压力支撑数据暂不可用</div>
+        {% endif %}
+    </div>
+
+    <!-- 分析理由 -->
+    <div class="card" style="margin-bottom:0;">
+        <div class="card-title">💡 分析理由</div>
+        <div class="reason-box">{{ variety.reason_full or '暂无详细分析理由' }}</div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ variety.variety_name }} - 数据看板 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --bg-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-yellow: #d29922;
+            --neon-purple: #a371f7;
+            --neon-cyan: #39c5cf;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .nav-link:hover {
+            color: var(--neon-blue);
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: var(--neon-blue);
+            color: white;
+        }
+
+        .user-role.admin {
+            background: var(--neon-purple);
+        }
+
+        .username {
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .menu-btn {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .menu-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .menu-btn.admin-btn {
+            background: rgba(163, 113, 247, 0.15);
+            border-color: rgba(163, 113, 247, 0.3);
+            color: var(--neon-purple);
+        }
+
+        .menu-btn.admin-btn:hover {
+            background: rgba(163, 113, 247, 0.25);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-link:hover {
+            color: var(--neon-blue);
+        }
+
+        /* 头部卡片 */
+        .header-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .header-meta {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .direction-tags {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .direction-tag {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* 红涨绿跌 - 符合中国期货习惯 */
+        .direction-tag.long {
+            background: rgba(248, 81, 73, 0.15);
+            color: var(--neon-red);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+        }
+
+        .direction-tag.short {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--neon-green);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+        }
+
+        .direction-tag.neutral {
+            background: rgba(139, 148, 158, 0.2);
+            color: var(--text-secondary);
+            border: 1px solid rgba(139, 148, 158, 0.3);
+        }
+
+        .probability-display {
+            text-align: center;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            min-width: 140px;
+        }
+
+        .probability-display.high { background: rgba(63, 185, 80, 0.15); }
+        .probability-display.medium { background: rgba(210, 153, 34, 0.15); }
+        .probability-display.low { background: rgba(248, 81, 73, 0.15); }
+
+        .probability-value {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .probability-display.high .probability-value { color: var(--neon-green); }
+        .probability-display.medium .probability-value { color: var(--neon-yellow); }
+        .probability-display.low .probability-value { color: var(--neon-red); }
+
+        .probability-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* 分组标题 */
+        .section-header {
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .section-icon {
+            font-size: 1.25rem;
+        }
+
+        /* 网格布局系统 */
+        .grid-row {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        /* 卡片样式 */
+        .detail-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 信息行样式 */
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.625rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .info-value {
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-align: right;
+        }
+
+        .info-value.large {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .info-value.positive { color: var(--neon-red); }  /* 红涨 */
+        .info-value.negative { color: var(--neon-green); }  /* 绿跌 */
+        .info-value.neutral { color: var(--text-secondary); }
+        .info-value.blue { color: var(--neon-blue); }
+
+        /* 三列数据网格 */
+        .data-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .data-item {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 1rem 0.75rem;
+            text-align: center;
+        }
+
+        .data-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .data-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .data-value.entry { color: var(--neon-blue); }  /* 入场 - 蓝色 */
+        .data-value.stop { color: var(--neon-green); }  /* 止损 - 绿色 */
+        .data-value.target { color: var(--neon-red); }  /* 目标 - 红色（红涨） */
+
+        /* 多周期分析 */
+        .timeframe-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+        }
+
+        .timeframe-card {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 1rem 0.5rem;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .timeframe-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .timeframe-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeframe-direction {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeframe-direction.bullish { color: var(--neon-red); }  /* 看涨 - 红色 */
+        .timeframe-direction.bearish { color: var(--neon-green); }  /* 看跌 - 绿色 */
+        .timeframe-direction.neutral { color: var(--text-muted); }
+
+        .timeframe-detail {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.low { background: var(--neon-green); }
+        .progress-fill.medium { background: var(--neon-yellow); }
+        .progress-fill.high { background: var(--neon-red); }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* 适合投资者 */
+        .suitability-box {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .suitability-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .suitability-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .suit-tag {
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .suit-tag.beginner {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--neon-green);
+        }
+
+        .suit-tag.intermediate {
+            background: rgba(210, 153, 34, 0.2);
+            color: var(--neon-yellow);
+        }
+
+        .suit-tag.professional {
+            background: rgba(248, 81, 73, 0.2);
+            color: var(--neon-red);
+        }
+
+        .suit-tag.inactive {
+            opacity: 0.3;
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+        }
+
+        .suitability-reason {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* 理由文本 */
+        .reason-box {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        /* 价格区域样式 */
+        .price-zones {
+            margin-bottom: 1rem;
+        }
+
+        .price-zone {
+            margin-bottom: 0.75rem;
+        }
+
+        .price-zone-title {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-zone-title.resistance { color: var(--neon-red); }
+        .price-zone-title.support { color: var(--neon-green); }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.375rem 0;
+            font-size: 0.875rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .price-item:last-child {
+            border-bottom: none;
+        }
+
+        /* 告警框 */
+        .alert-box {
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-box.danger {
+            border: 1px solid var(--neon-red);
+            background: rgba(248, 81, 73, 0.1);
+        }
+
+        .alert-box.warning {
+            border: 1px solid var(--neon-yellow);
+            background: rgba(210, 153, 34, 0.1);
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .alert-title.danger { color: var(--neon-red); }
+        .alert-title.warning { color: var(--neon-yellow); }
+
+        /* 空状态 */
+        .empty-state {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* 打印样式 */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 1cm;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body {
+                background: var(--bg-primary) !important;
+                color: var(--text-primary) !important;
+            }
+
+            .navbar, .back-link {
+                display: none !important;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0.5cm;
+            }
+
+            .header-card, .detail-card {
+                background: var(--bg-card) !important;
+                border: 1px solid var(--border-color) !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .grid-row {
+                display: grid;
+                gap: 1rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .timeframe-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .data-grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeframe-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header-top {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .probability-display {
+                width: 100%;
+            }
+
+            .data-grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 紧凑布局优化 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-card {
+            margin-bottom: 1rem;
+            padding: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        .header-meta {
+            font-size: 0.75rem !important;
+        }
+
+        .direction-tags {
+            margin-top: 0.5rem !important;
+            gap: 0.5rem !important;
+        }
+
+        .direction-tag {
+            font-size: 0.75rem !important;
+            padding: 0.25rem 0.6rem !important;
+        }
+
+        .probability-display {
+            min-width: 100px !important;
+            padding: 0.75rem !important;
+        }
+
+        .probability-value {
+            font-size: 1.5rem !important;
+        }
+
+        .probability-label {
+            font-size: 0.7rem !important;
+        }
+
+        .alert-box {
+            padding: 0.75rem 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        .alert-title {
+            font-size: 0.85rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        .section-header {
+            margin: 1rem 0 0.75rem !important;
+            padding: 0.5rem 0 !important;
+        }
+
+        .section-icon {
+            font-size: 1rem !important;
+        }
+
+        .section-title {
+            font-size: 1rem !important;
+        }
+
+        .grid-row {
+            gap: 0.75rem !important;
+        }
+
+        .detail-card {
+            padding: 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
+        .card-title {
+            font-size: 0.9rem !important;
+            margin-bottom: 0.75rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+
+        .info-list {
+            gap: 0.5rem !important;
+        }
+
+        .info-row {
+            padding: 0.4rem 0 !important;
+            font-size: 0.8rem !important;
+        }
+
+        .info-label {
+            font-size: 0.75rem !important;
+        }
+
+        .info-value {
+            font-size: 0.8rem !important;
+        }
+
+        .info-value.large {
+            font-size: 1rem !important;
+        }
+
+        .data-grid-3 {
+            gap: 0.5rem !important;
+        }
+
+        .data-item {
+            padding: 0.75rem !important;
+        }
+
+        .data-label {
+            font-size: 0.7rem !important;
+        }
+
+        .data-value {
+            font-size: 0.9rem !important;
+        }
+
+        .progress-container {
+            padding: 0.5rem 0 !important;
+        }
+
+        .progress-bar {
+            height: 6px !important;
+        }
+
+        .progress-labels {
+            font-size: 0.65rem !important;
+            margin-top: 0.25rem !important;
+        }
+
+        .timeframe-grid {
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+
+        .timeframe-item {
+            padding: 0.5rem !important;
+        }
+
+        .timeframe-name {
+            font-size: 0.6rem !important;
+        }
+
+        .timeframe-direction {
+            font-size: 0.75rem !important;
+        }
+
+        .timeframe-trend {
+            font-size: 0.6rem !important;
+        }
+
+        .timeframe-rsi {
+            font-size: 0.6rem !important;
+        }
+
+        .price-zones {
+            padding: 0.75rem !important;
+        }
+
+        .price-zone {
+            margin-bottom: 0.75rem !important;
+        }
+
+        .price-zone-title {
+            font-size: 0.8rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        .price-item {
+            padding: 0.4rem 0.6rem !important;
+            font-size: 0.8rem !important;
+        }
+
+        .metric-grid {
+            gap: 0.5rem !important;
+        }
+
+        .metric-item {
+            padding: 0.75rem !important;
+        }
+
+        .metric-label {
+            font-size: 0.7rem !important;
+        }
+
+        .metric-value {
+            font-size: 0.9rem !important;
+        }
+
+        .conclusion-text {
+            font-size: 0.8rem !important;
+            line-height: 1.5 !important;
+        }
+
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .grid-3 {
+                grid-template-columns: 1fr !important;
+            }
+
+            .timeframe-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            .header-title h1 {
+                font-size: 1.1rem !important;
+            }
+
+            .probability-display {
+                min-width: 80px !important;
+            }
+
+            .probability-value {
+                font-size: 1.25rem !important;
+            }
+        }
+
+        /* 弹窗紧凑布局优化 */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .header-card {
+                padding: 1rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+            
+            .header-title h1 {
+                font-size: 1.25rem !important;
+            }
+            
+            .detail-card {
+                padding: 0.75rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .card-title {
+                font-size: 0.85rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .info-row {
+                padding: 0.375rem 0 !important;
+                font-size: 0.8rem !important;
+            }
+            
+            .data-item {
+                padding: 0.5rem !important;
+            }
+            
+            .timeframe-item {
+                padding: 0.5rem !important;
+            }
+            
+            .grid-row {
+                gap: 0.5rem !important;
+            }
+        }
+
+        /* 弹窗/紧凑布局优化 */
+        .container {
+            max-width: 1200px;
+            padding: 0.75rem;
+        }
+        
+        .header-card {
+            padding: 1rem 1.25rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .header-title h1 {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .header-meta {
+            font-size: 0.75rem !important;
+        }
+        
+        .direction-tags {
+            gap: 0.5rem !important;
+            margin-top: 0.5rem !important;
+        }
+        
+        .direction-tag {
+            font-size: 0.75rem !important;
+            padding: 0.25rem 0.6rem !important;
+        }
+        
+        .probability-display {
+            min-width: 90px !important;
+            padding: 0.625rem !important;
+        }
+        
+        .probability-value {
+            font-size: 1.5rem !important;
+        }
+        
+        .probability-label {
+            font-size: 0.7rem !important;
+        }
+        
+        .section-header {
+            margin: 1rem 0 0.75rem !important;
+            padding: 0.5rem 0 !important;
+        }
+        
+        .section-title {
+            font-size: 1rem !important;
+        }
+        
+        .grid-row {
+            gap: 0.75rem !important;
+        }
+        
+        .detail-card {
+            padding: 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .card-title {
+            font-size: 0.9rem !important;
+            margin-bottom: 0.625rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+        
+        .info-list {
+            gap: 0.5rem !important;
+        }
+        
+        .info-row {
+            padding: 0.375rem 0 !important;
+            font-size: 0.8rem !important;
+        }
+        
+        .info-label {
+            font-size: 0.75rem !important;
+        }
+        
+        .info-value {
+            font-size: 0.8rem !important;
+        }
+        
+        .data-item {
+            padding: 0.625rem !important;
+        }
+        
+        .data-label {
+            font-size: 0.7rem !important;
+        }
+        
+        .data-value {
+            font-size: 0.875rem !important;
+        }
+        
+        .timeframe-grid {
+            gap: 0.5rem !important;
+        }
+        
+        .timeframe-item {
+            padding: 0.5rem !important;
+        }
+        
+        .timeframe-name {
+            font-size: 0.6rem !important;
+        }
+        
+        .timeframe-direction {
+            font-size: 0.75rem !important;
+        }
+        
+        .timeframe-trend {
+            font-size: 0.6rem !important;
+        }
+        
+        .price-item {
+            padding: 0.375rem 0.5rem !important;
+            font-size: 0.75rem !important;
+        }
+        
+        .metric-item {
+            padding: 0.625rem !important;
+        }
+        
+        .alert-box {
+            padding: 0.75rem 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .alert-title {
+            font-size: 0.85rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .header-card {
+                padding: 0.75rem 1rem !important;
+            }
+            
+            .header-title h1 {
+                font-size: 1.1rem !important;
+            }
+            
+            .grid-3, .grid-2 {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .timeframe-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            {{ variety.variety_name }} - 品种详情
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="/xwx422/data_dashboard" style="background: var(--bg-elevated); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-size: 0.875rem; transition: all 0.2s; text-decoration: none;">← 返回 数据看板</a>
+            <a href="/xwx422" style="background: var(--bg-elevated); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-size: 0.875rem; transition: all 0.2s; text-decoration: none;">控制台</a>
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--bg-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <span style="font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 4px; background: var(--neon-purple); color: white;">管理员</span>
+                <span style="font-size: 0.875rem; color: var(--text-primary); font-weight: 500;">{{ session.username }}</span>
+            </div>
+            <a href="/logout" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: var(--radius-md); cursor: pointer; font-size: 0.875rem; transition: all 0.2s; text-decoration: none;">退出</a>
+        </div>
+    </nav>
+
+    <div style="max-width: 1400px; margin: 0 auto; padding: 2rem;"
+        <!-- 头部卡片 -->
+        <div class="header-card">
+            <div class="header-top">
+                <div class="header-title">
+                    <h1>{{ variety.variety_name }} ({{ variety.variety_code }})</h1>
+                    <div class="header-meta">
+                        {{ variety.main_contract_clean or '主力合约' }} | 
+                        更新于 {{ variety.run_time }}
+                    </div>
+                    <div class="direction-tags">
+                        <span class="direction-tag {{ 'long' if variety.trade_direction == '做多' else 'short' if variety.trade_direction == '做空' else 'neutral' }}">
+                            {{ variety.trade_direction or '观望' }}
+                        </span>
+                        <span class="direction-tag" style="background: rgba(88, 166, 255, 0.15); color: var(--neon-blue); border: 1px solid rgba(88, 166, 255, 0.3);">
+                            波动 {{ "%.2f"|format((variety.atr_ratio or 0) * 100) }}%
+                        </span>
+                        <span class="direction-tag" style="background: rgba(163, 113, 247, 0.15); color: var(--neon-purple); border: 1px solid rgba(163, 113, 247, 0.3);">
+                            胜率{{ variety.fund_probability }}%
+                        </span>
+                    </div>
+                </div>
+                <div class="probability-display {{ 'high' if variety.fund_probability >= 70 else 'medium' if variety.fund_probability >= 40 else 'low' }}">
+                    <div class="probability-value">{{ variety.fund_probability }}%</div>
+                    <div class="probability-label">预估胜率</div>
+                </div>
+                <!-- 实际胜率显示 -->
+                <div class="probability-display" id="actual-win-rate" style="display: none;">
+                    <div class="probability-value" id="actual-win-rate-value">-</div>
+                    <div class="probability-label">实际胜率(<span id="actual-trade-count">0</span>笔)</div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        // 加载该品种的实际胜率
+        (function() {
+            fetch('/api/signal/variety/{{ variety.variety_code }}?days=30')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.stats && data.stats.total > 0) {
+                        const s = data.stats;
+                        document.getElementById('actual-win-rate').style.display = 'block';
+                        document.getElementById('actual-win-rate-value').textContent = s.win_rate + '%';
+                        document.getElementById('actual-win-rate-value').className = 'probability-value ' + 
+                            (s.win_rate >= 70 ? 'high' : (s.win_rate >= 40 ? 'medium' : 'low'));
+                        document.getElementById('actual-trade-count').textContent = s.total;
+                    }
+                })
+                .catch(err => console.log('加载实际胜率失败:', err));
+        })();
+        </script>
+
+        <!-- 换月风险提示 -->
+        {% if variety.rollover_info and variety.rollover_info.is_rollover_period %}
+        <div class="alert-box {{ 'danger' if variety.rollover_info.warning_level == 'danger' else 'warning' }}">
+            <div class="alert-title {{ variety.rollover_info.warning_level }}">
+                ⚠️ 换月风险提示
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">{{ variety.rollover_info.message }}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                        合约月份: {{ variety.rollover_info.contract_month }} | 距离交割: {{ variety.rollover_info.days_to_delivery }}天
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">建议操作</div>
+                    <div style="font-size: 1rem; font-weight: 600; color: {% if variety.rollover_info.warning_level == 'danger' %}var(--neon-red){% else %}var(--neon-yellow){% endif %}">
+                        {% if variety.rollover_info.warning_level == 'danger' %}强烈建议移仓或观望{% else %}注意流动性风险，适当减仓{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 第一组：核心交易决策 -->
+        <div class="section-header">
+            <span class="section-icon">🎯</span>
+            <span class="section-title">核心交易决策</span>
+        </div>
+        <div class="grid-row grid-3">
+            <!-- 交易计划 -->
+            <div class="detail-card">
+                <div class="card-title">交易计划</div>
+                <div class="data-grid-3">
+                    <div class="data-item">
+                        <div class="data-label">建议入场</div>
+                        <div class="data-value entry">{{ "%0.f"|format(variety.entry_price) if variety.entry_price else 'N/A' }}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">止损位</div>
+                        <div class="data-value stop">{{ "%0.f"|format(variety.stop_loss) if variety.stop_loss else 'N/A' }}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">目标位</div>
+                        <div class="data-value target">{{ "%0.f"|format(variety.target_price) if variety.target_price else 'N/A' }}</div>
+                    </div>
+                </div>
+
+                <div class="info-list">
+                    {% if variety.stop_type %}
+                    <div class="info-row">
+                        <span class="info-label">止损类型</span>
+                        <span class="info-value">{{ variety.stop_type }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if variety.entry_price and variety.stop_loss %}
+                    {% set risk_ratio = (variety.entry_price - variety.stop_loss) / variety.entry_price * 100 %}
+                    <div class="info-row">
+                        <span class="info-label">止损比例</span>
+                        <span class="info-value {{ 'positive' if risk_ratio > 0 else 'negative' }}">{{ "%.2f"|format(risk_ratio|abs) }}%</span>
+                    </div>
+                    {% endif %}
+
+                    {% if variety.risk_reward_ratio %}
+                    <div class="info-row">
+                        <span class="info-label">风险回报比</span>
+                        <span class="info-value {{ 'positive' if variety.risk_reward_ratio >= 1.5 else 'neutral' if variety.risk_reward_ratio >= 1 else 'negative' }}">
+                            {{ "%.1f"|format(variety.risk_reward_ratio) }}:1
+                        </span>
+                    </div>
+                    {% elif variety.entry_price and variety.target_price and variety.stop_loss %}
+                    {% set risk = (variety.entry_price - variety.stop_loss)|abs %}
+                    {% set reward = (variety.target_price - variety.entry_price)|abs %}
+                    {% set rr_ratio = reward / risk if risk > 0 else 0 %}
+                    <div class="info-row">
+                        <span class="info-label">风险回报比</span>
+                        <span class="info-value {{ 'positive' if rr_ratio >= 1.5 else 'neutral' if rr_ratio >= 1 else 'negative' }}">{{ "%.1f"|format(rr_ratio) }}:1</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="info-row">
+                        <span class="info-label">综合评分</span>
+                        <span class="info-value">{{ variety.composite_score or '中' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 风险评估 -->
+            <div class="detail-card">
+                <div class="card-title">风险评估</div>
+                {% if variety.position_analysis %}
+                {% set pa = variety.position_analysis %}
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">建议手数</span>
+                        <span class="info-value large blue">{{ pa.suggested_lots if pa.suggested_lots else 'N/A' }}手</span>
+                    </div>
+                    {% if pa.volatility_factor and pa.volatility_factor != 1.0 %}
+                    <div class="info-row">
+                        <span class="info-label">波动调整系数</span>
+                        <span class="info-value">{{ "%.1f"|format(pa.volatility_factor) }}x</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">风险金额</span>
+                        <span class="info-value">¥{{ "%.0f"|format(pa.risk_amount) if pa.risk_amount else 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">实际风险比例</span>
+                        <span class="info-value">{{ "%.2f"|format(pa.actual_risk_pct) if pa.actual_risk_pct else 'N/A' }}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">保证金占用</span>
+                        <span class="info-value">¥{{ "%.0f"|format(pa.margin_required) if pa.margin_required else 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">仓位占比</span>
+                        <span class="info-value">{{ "%.1f"|format(pa.position_pct) if pa.position_pct else 'N/A' }}%</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">最大仓位</span>
+                        <span class="info-value">{{ "%.0f"|format(variety.risk_max_position_pct * 100) if variety.risk_max_position_pct else 'N/A' }}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">单日最大亏损</span>
+                        <span class="info-value">{{ "%.0f"|format(variety.risk_max_daily_loss_pct * 100) if variety.risk_max_daily_loss_pct else 'N/A' }}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">建议手数(50万示例)</span>
+                        <span class="info-value large blue">{{ variety.risk_suggested_position if variety.risk_suggested_position else 'N/A' }}手</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">每手保证金</span>
+                        <span class="info-value">¥{{ "%.0f"|format(variety.risk_margin_per_contract) if variety.risk_margin_per_contract else 'N/A' }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 海龟交易 -->
+            <div class="detail-card">
+                <div class="card-title">🐢 海龟交易</div>
+                <div style="padding: 0.5rem 0.75rem; background: rgba(139,148,158,0.08); border-radius: 6px; font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.75rem;">
+                    <strong style="color: var(--text-primary);">这是什么？</strong>海龟交易法是一套机械的趋势跟踪系统，只看价格有没有突破过去20天（或55天）的最高/最低点。<br>
+                    • <strong>做多</strong>＝突破20日高点 &nbsp;|&nbsp; <strong>做空</strong>＝跌破20日低点 &nbsp;|&nbsp; <strong>观望</strong>＝价格在区间内<br>
+                    "交易建议"是AI对方向的前瞻判断，"海龟信号"则是等趋势确认后再入场的触发器。搭配使用更好：<strong>AI帮你选方向，海龟帮你等确认。</strong>
+                </div>
+                {% if variety.turtle_channel %}
+                {% if variety.turtle_channel.get('_approx') %}
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">⚠️ 基于历史收盘价近似计算</div>
+                {% endif %}
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">20日高点</span>
+                        <span class="info-value">{{ "%.0f"|format(variety.turtle_channel.d20_high) }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">20日低点</span>
+                        <span class="info-value">{{ "%.0f"|format(variety.turtle_channel.d20_low) }}</span>
+                    </div>
+                    {% if variety.turtle_channel.d55_high %}
+                    <div class="info-row">
+                        <span class="info-label">55日高点</span>
+                        <span class="info-value">{{ "%.0f"|format(variety.turtle_channel.d55_high) }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">55日低点</span>
+                        <span class="info-value">{{ "%.0f"|format(variety.turtle_channel.d55_low) }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">海龟信号</span>
+                        <span class="info-value large {% if variety.turtle_signal == '做多' %}up{% elif variety.turtle_signal == '做空' %}down{% else %}neutral{% endif %}">{{ variety.turtle_signal or '观望' }}</span>
+                    </div>
+                    {% if variety.turtle_distance and variety.turtle_signal == '观望' and variety.turtle_distance.points > 0 %}
+                    <div class="info-row">
+                        <span class="info-label">距离突破</span>
+                        <span class="info-value" style="font-size:0.75rem;color:var(--text-muted);">
+                            需{{ variety.turtle_distance.direction }} <strong style="color:var(--text-primary);">{{ "%.0f"|format(variety.turtle_distance.points) }}</strong> 点才会触发信号
+                        </span>
+                    </div>
+                    {% endif %}
+                    {% if variety.position_info %}
+                    <div class="info-row">
+                        <span class="info-label">建议仓位</span>
+                        <span class="info-value large blue">
+                            {% if variety.position_info.unit_size > 0 %}{{ variety.position_info.unit_size }}手{% else %}<1手{% endif %}
+                        </span>
+                    </div>
+                    {% if variety.position_info.unit_size == 0 %}
+                    <div class="info-row">
+                        <span class="info-label">风险提示</span>
+                        <span class="info-value" style="font-size:0.75rem;color:var(--text-muted);">
+                            示例账户50万元，该品种1手风险约¥{{ "%.0f"|format(variety.position_info.risk_per_lot) }}，已超过单笔建议风险限额（¥{{ "%.0f"|format(variety.position_info.risk_amount) }}），资金不足以开仓1手。
+                        </span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">止损距离(2N)</span>
+                        <span class="info-value">{{ "%.1f"|format(variety.position_info.stop_distance) }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">单笔风险金额</span>
+                        <span class="info-value">¥{{ "%.0f"|format(variety.position_info.risk_amount) }}</span>
+                    </div>
+                    {% endif %}
+                    {% if variety.position_group %}
+                    <div class="info-row">
+                        <span class="info-label">当前持仓</span>
+                        <span class="info-value">{{ variety.position_group.total_units }}手 @ {{ "%.0f"|format(variety.position_group.avg_entry_price) }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">移动止损</span>
+                        <span class="info-value">{{ "%.0f"|format(variety.position_group.current_stop_loss) }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="empty-state">暂无海龟通道数据（数据更新后将自动计算）</div>
+                {% endif %}
+            </div>
+
+            <!-- 压力支撑分析 -->
+            <div class="detail-card">
+                <div class="card-title">压力支撑分析</div>
+                {% if variety.support_resistance %}
+                <div class="price-zones">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-elevated); border-radius: var(--radius-md);">
+                        <span style="color: var(--text-secondary);">当前价格</span>
+                        <span style="font-size: 1.25rem; font-weight: 600; color: var(--neon-blue);">{{ "%0.f"|format(variety.support_resistance.current_price) }}</span>
+                    </div>
+                    
+                    {% if variety.support_resistance.resistances %}
+                    <div class="price-zone">
+                        <div class="price-zone-title resistance">🔴 阻力位</div>
+                        {% for r in variety.support_resistance.resistances %}
+                        <div class="price-item">
+                            <span>{{ "%0.f"|format(r) }}</span>
+                            <span style="color: var(--text-muted);">+{{ "%.1f"|format((r - variety.support_resistance.current_price) / variety.support_resistance.current_price * 100) }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div style="height: 1px; background: var(--border-color); margin: 0.75rem 0;"></div>
+                    
+                    {% if variety.support_resistance.supports %}
+                    <div class="price-zone">
+                        <div class="price-zone-title support">🟢 支撑位</div>
+                        {% for s in variety.support_resistance.supports %}
+                        <div class="price-item">
+                            <span>{{ "%0.f"|format(s) }}</span>
+                            <span style="color: var(--text-muted);">-{{ "%.1f"|format((variety.support_resistance.current_price - s) / variety.support_resistance.current_price * 100) }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if variety.support_resistance.pivot_points %}
+                <div style="font-size: 0.75rem; color: var(--text-secondary); padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
+                    <div style="margin-bottom: 0.25rem;">枢轴点: {{ "%0.f"|format(variety.support_resistance.pivot_points.pivot) }}</div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>R1: {{ "%0.f"|format(variety.support_resistance.pivot_points.r1) }}</span>
+                        <span>S1: {{ "%0.f"|format(variety.support_resistance.pivot_points.s1) }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="empty-state">
+                    压力支撑数据暂不可用
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 第二组：趋势与技术分析 -->
+        <div class="section-header">
+            <span class="section-icon">📊</span>
+            <span class="section-title">趋势与技术分析</span>
+        </div>
+        <div class="grid-row grid-3">
+            <!-- 趋势分析 -->
+            <div class="detail-card">
+                <div class="card-title">趋势分析</div>
+                {% if variety.adx_info %}
+                <div style="margin-bottom: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="color: var(--text-secondary);">趋势强度 (ADX)</span>
+                        <span style="font-weight: 600; font-size: 1.125rem; color: {% if variety.adx_info.is_trending %}var(--neon-green){% else %}var(--text-muted){% endif %}">
+                            {{ variety.adx_info.trend_strength }}
+                        </span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill {{ 'low' if variety.adx_info.adx < 20 else 'medium' if variety.adx_info.adx < 40 else 'high' }}"
+                                 style="width: {{ min(variety.adx_info.adx * 2, 100) }}%;"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span>无趋势</span>
+                            <span>{{ "%.1f"|format(variety.adx_info.adx) }}</span>
+                            <span>强趋势</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if variety.trend_info %}
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">趋势方向</span>
+                        <span class="info-value {{ 'positive' if '多头' in variety.trend_info.direction else 'negative' if '空头' in variety.trend_info.direction else 'neutral' }}">
+                            {{ variety.trend_info.direction }}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">趋势评分</span>
+                        <span class="info-value large">{{ variety.trend_info.trend_score }}/100</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">均线排列</span>
+                        <span class="info-value">MA10: {{ "%0.f"|format(variety.trend_info.ma_short) if variety.trend_info.ma_short else 'N/A' }} | MA30: {{ "%0.f"|format(variety.trend_info.ma_long) if variety.trend_info.ma_long else 'N/A' }}</span>
+                    </div>
+                    {% if variety.trend_info.is_golden_cross %}
+                    <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(63, 185, 80, 0.1); border-radius: var(--radius-md); color: var(--neon-green); font-size: 0.875rem; text-align: center;">
+                        🔔 刚刚形成金叉信号
+                    </div>
+                    {% elif variety.trend_info.is_dead_cross %}
+                    <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(248, 81, 73, 0.1); border-radius: var(--radius-md); color: var(--neon-red); font-size: 0.875rem; text-align: center;">
+                        🔔 刚刚形成死叉信号
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    趋势数据暂不可用
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 多周期分析 -->
+            <div class="detail-card">
+                <div class="card-title">多时间周期分析</div>
+                {% if variety.timeframe_analysis %}
+                <div class="timeframe-grid">
+                    {% for tf_name, tf_data in variety.timeframe_analysis.items() %}
+                    <div class="timeframe-card">
+                        <div class="timeframe-name">{{ tf_name.upper() }}</div>
+                        <div class="timeframe-direction {{ 'bullish' if '多' in tf_data.direction else 'bearish' if '空' in tf_data.direction else 'neutral' }}">
+                            {{ tf_data.direction }}
+                        </div>
+                        <div class="timeframe-detail">{{ tf_data.trend }}</div>
+                        {% if tf_data.rsi %}
+                        <div class="timeframe-detail">RSI: {{ "%0.f"|format(tf_data.rsi) }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); text-align: center; font-weight: 600; color: var(--neon-blue);">
+                    {{ variety.timeframe_confluence or '分析中' }}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    多周期数据暂不可用
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 技术分析 -->
+            <div class="detail-card">
+                <div class="card-title">技术指标</div>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">技术趋势</span>
+                        <span class="info-value">{{ variety.tech_trend or 'N/A' }}</span>
+                    </div>
+                    
+                    {% if variety.tech_indicators %}
+                        {% if variety.tech_indicators.macd %}
+                        <div class="info-row">
+                            <span class="info-label">MACD</span>
+                            <span class="info-value">{{ variety.tech_indicators.macd.macd_signal }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if variety.tech_indicators.rsi %}
+                        <div class="info-row">
+                            <span class="info-label">RSI</span>
+                            <span class="info-value {{ 'positive' if variety.tech_indicators.rsi.rsi_value > 70 else 'negative' if variety.tech_indicators.rsi.rsi_value < 30 else 'neutral' }}">
+                                {{ "%0.f"|format(variety.tech_indicators.rsi.rsi_value) }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if variety.tech_indicators.bollinger %}
+                        <div class="info-row">
+                            <span class="info-label">布林带</span>
+                            <span class="info-value">{{ variety.tech_indicators.bollinger.bb_signal }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if variety.tech_indicators.kdj %}
+                        <div class="info-row">
+                            <span class="info-label">KDJ</span>
+                            <span class="info-value">K{{ "%0.f"|format(variety.tech_indicators.kdj.k_value) }} / D{{ "%0.f"|format(variety.tech_indicators.kdj.d_value) }}</span>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三组：资金面分析 -->
+        <div class="section-header">
+            <span class="section-icon">💰</span>
+            <span class="section-title">资金面分析</span>
+        </div>
+        <div class="grid-row grid-3">
+            <!-- 主力资金分析 -->
+            <div class="detail-card">
+                <div class="card-title">主力资金分析</div>
+                {% if variety.fund_analysis and variety.fund_analysis.oi_analysis %}
+                {% set oi = variety.fund_analysis.oi_analysis %}
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">持仓信号</span>
+                        <span class="info-value {{ 'positive' if oi.strength > 60 else 'negative' if oi.strength < 40 else 'neutral' }} large">
+                            {{ oi.signal }}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">持仓变化</span>
+                        <span class="info-value {{ 'positive' if oi.oi_change_pct > 0 else 'negative' }}">
+                            {{ "+%.1f"|format(oi.oi_change_pct) if oi.oi_change_pct > 0 else "%.1f"|format(oi.oi_change_pct) }}%
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">价格变化(5日)</span>
+                        <span class="info-value {{ 'positive' if oi.price_change_pct > 0 else 'negative' }}">
+                            {{ "+%.1f"|format(oi.price_change_pct) if oi.price_change_pct > 0 else "%.1f"|format(oi.price_change_pct) }}%
+                        </span>
+                    </div>
+                    {% if oi.is_strong_signal %}
+                    <div style="margin-top: 0.75rem; padding: 0.75rem; background: var(--bg-elevated); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
+                        <strong>信号解读：</strong>{{ oi.interpretation }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    资金数据暂不可用
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 量价分析 -->
+            <div class="detail-card">
+                <div class="card-title">量价分析</div>
+                {% if variety.volume_analysis %}
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">资金流向</span>
+                        <span class="info-value {{ 'positive' if '流入' in variety.volume_analysis.signal else 'negative' if '流出' in variety.volume_analysis.signal else 'neutral' }}">
+                            {{ variety.volume_analysis.signal or 'N/A' }}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">成交量趋势</span>
+                        <span class="info-value">{{ variety.volume_analysis.volume_trend or 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">量比</span>
+                        <span class="info-value">{{ "%.2f"|format(variety.volume_analysis.volume_ratio) if variety.volume_analysis.volume_ratio else 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">5日价格变化</span>
+                        <span class="info-value {{ 'positive' if variety.volume_analysis.price_change_5d > 0 else 'negative' if variety.volume_analysis.price_change_5d < 0 else 'neutral' }}">
+                            {{ "%.2f"|format(variety.volume_analysis.price_change_5d * 100) if variety.volume_analysis.price_change_5d else 'N/A' }}%
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">持仓量变化</span>
+                        <span class="info-value {{ 'positive' if variety.oi_change > 0 else 'negative' if variety.oi_change < 0 else 'neutral' }}">
+                            {{ "%.2f"|format(variety.oi_change * 100) if variety.oi_change is not none else 'N/A' }}%
+                        </span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    量价数据暂不可用
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 价格与波动 -->
+            <div class="detail-card">
+                <div class="card-title">价格与波动</div>
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label">当前价格</span>
+                        <span class="info-value large blue">{{ "%0.f"|format(variety.price) if variety.price else 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">价格分位</span>
+                        <span class="info-value">{{ "%0.f"|format(variety.fund_data.price_percentile) if variety.fund_data and variety.fund_data.price_percentile else 'N/A' }}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">ATR波动率</span>
+                        <span class="info-value">{{ "%.2f"|format(variety.atr_value) if variety.atr_value else 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">波动率比例</span>
+                        <span class="info-value {{ 'positive' if variety.atr_ratio and variety.atr_ratio < 0.015 else 'neutral' if variety.atr_ratio and variety.atr_ratio < 0.025 else 'negative' }}">
+                            {{ "%.2f"|format(variety.atr_ratio * 100) if variety.atr_ratio else 'N/A' }}%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="suitability-box" style="margin-top: 1.25rem;">
+                    <div class="suitability-title">风险等级评估</div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill {{ 'low' if variety.atr_ratio and variety.atr_ratio < 0.015 else 'medium' if variety.atr_ratio and variety.atr_ratio < 0.025 else 'high' }}"
+                                 style="width: {{ min((variety.atr_ratio or 0) * 4000, 100) }}%;"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span>低风险</span>
+                            <span>
+                                {% if variety.atr_ratio and variety.atr_ratio < 0.015 %}适合稳健操作
+                                {% elif variety.atr_ratio and variety.atr_ratio < 0.025 %}注意仓位控制
+                                {% else %}需严格止损{% endif %}
+                            </span>
+                            <span>高风险</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第四组：决策支持 -->
+        <div class="section-header">
+            <span class="section-icon">💡</span>
+            <span class="section-title">决策支持</span>
+        </div>
+        <div class="grid-row grid-2">
+            <!-- 投资者适合度 -->
+            <div class="detail-card">
+                <div class="card-title">投资者适合度分析</div>
+                <div>
+                    <div class="suitability-title" style="margin-bottom: 0.75rem;">推荐投资者类型</div>
+                    <div class="suitability-tags">
+                        {% if variety.suitability.beginner %}
+                        <span class="suit-tag beginner">✓ 新手投资者</span>
+                        {% else %}
+                        <span class="suit-tag inactive">新手投资者</span>
+                        {% endif %}
+                        
+                        {% if variety.suitability.intermediate %}
+                        <span class="suit-tag intermediate">✓ 中级投资者</span>
+                        {% else %}
+                        <span class="suit-tag inactive">中级投资者</span>
+                        {% endif %}
+                        
+                        {% if variety.suitability.professional %}
+                        <span class="suit-tag professional">✓ 专业投资者</span>
+                        {% else %}
+                        <span class="suit-tag inactive">专业投资者</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="suitability-reason" style="margin-bottom: 1rem;">
+                        <strong>分析依据：</strong>{{ variety.suitability.reason }}
+                    </div>
+                    
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                        <div style="margin-bottom: 0.5rem;"><strong style="color: var(--neon-green);">新手投资者：</strong>高胜率(≥70%) + 低波动(&lt;2%) + 趋势明确</div>
+                        <div style="margin-bottom: 0.5rem;"><strong style="color: var(--neon-yellow);">中级投资者：</strong>中等胜率(50-70%) + 有明确方向</div>
+                        <div><strong style="color: var(--neon-red);">专业投资者：</strong>低胜率(&lt;50%) 或 高波动(≥2.5%) 或 多周期分歧</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作建议 -->
+            <div class="detail-card" style="display: flex; flex-direction: column;">
+                <div class="card-title">🎯 操作建议</div>
+                {% set action_bg = 'rgba(139,148,158,0.08)' %}
+                {% set action_color = 'var(--text-primary)' %}
+                {% set action_icon = '⏸️' %}
+                {% set action_text = '' %}
+                {% if variety.trade_direction == '做多' %}
+                    {% if variety.turtle_signal == '做多' %}
+                        {% set action_bg = 'rgba(34,197,94,0.12)' %}
+                        {% set action_color = '#22c55e' %}
+                        {% set action_icon = '✅' %}
+                        {% set action_text = 'AI与海龟方向一致，趋势已确认，可考虑按建议仓位做多。' %}
+                    {% elif variety.turtle_signal == '做空' %}
+                        {% set action_text = 'AI看多但海龟看空，两者方向相反，建议先观望，等待信号统一。' %}
+                    {% else %}
+                        {% if variety.turtle_distance and variety.turtle_distance.points > 0 %}
+                            {% set action_text = 'AI判断趋势偏多，但价格尚未突破通道，建议等向上突破 ' ~ "%.0f"|format(variety.turtle_distance.points) ~ ' 点后再考虑进场。' %}
+                        {% else %}
+                            {% set action_text = 'AI判断趋势偏多，但海龟尚未触发突破，建议先观望等待确认。' %}
+                        {% endif %}
+                    {% endif %}
+                {% elif variety.trade_direction == '做空' %}
+                    {% if variety.turtle_signal == '做空' %}
+                        {% set action_bg = 'rgba(239,68,68,0.12)' %}
+                        {% set action_color = '#ef4444' %}
+                        {% set action_icon = '✅' %}
+                        {% set action_text = 'AI与海龟方向一致，趋势已确认，可考虑按建议仓位做空。' %}
+                    {% elif variety.turtle_signal == '做多' %}
+                        {% set action_text = 'AI看空但海龟看多，两者方向相反，建议先观望，等待信号统一。' %}
+                    {% else %}
+                        {% if variety.turtle_distance and variety.turtle_distance.points > 0 %}
+                            {% set action_text = 'AI判断趋势偏空，但价格尚未跌破通道，建议等向下跌破 ' ~ "%.0f"|format(variety.turtle_distance.points) ~ ' 点后再考虑进场。' %}
+                        {% else %}
+                            {% set action_text = 'AI判断趋势偏空，但海龟尚未触发跌破，建议先观望等待确认。' %}
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    {% if variety.turtle_signal == '观望' %}
+                        {% set action_text = '当前多空信号均不明朗，没有明确入场机会，建议保持观望。' %}
+                    {% else %}
+                        {% set action_text = 'AI暂无明确方向，但海龟已出现' ~ variety.turtle_signal ~ '信号，若进场建议仅轻仓试探。' %}
+                    {% endif %}
+                {% endif %}
+                {% if variety.position_info %}
+                    {% if variety.position_info.unit_size > 0 %}
+                        {% set action_text = action_text ~ '（示例账户50万，若触发信号建议仓位 ' ~ variety.position_info.unit_size ~ ' 手）' %}
+                    {% else %}
+                        {% set action_text = action_text ~ '（示例账户50万，当前波动下不足以安全开仓1手。）' %}
+                    {% endif %}
+                {% endif %}
+                <div style="padding: 0.75rem; background: {{ action_bg }}; border-radius: 6px; font-size: 0.875rem; color: {{ action_color }}; line-height: 1.6; margin-bottom: 0.75rem; font-weight: 500;">
+                    <span style="margin-right: 4px;">{{ action_icon }}</span>{{ action_text }}
+                </div>
+            </div>
+
+            <!-- 分析理由 -->
+            <div class="detail-card" style="display: flex; flex-direction: column;">
+                <div class="card-title">💡 分析理由</div>
+                <div class="reason-box">
+                    {{ variety.reason_full or '暂无详细分析理由' }}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

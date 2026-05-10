@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+    
+    <!-- 首页 -->
+    <url>
+        <loc>https://qh.ossou.cn/</loc>
+        <lastmod>2026-01-31</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://qh.ossou.cn/static/images/list.jpeg</image:loc>
+            <image:title>AI期货分析助手-多品种分析面板</image:title>
+            <image:caption>展示12个精选期货品种的趋势方向、胜率评估和风险等级</image:caption>
+        </image:image>
+        <image:image>
+            <image:loc>https://qh.ossou.cn/static/images/detail.jpeg</image:loc>
+            <image:title>AI期货分析助手-品种详情分析</image:title>
+            <image:caption>详细的AI研判报告、技术指标和交易建议</image:caption>
+        </image:image>
+    </url>
+    
+    <!-- 登录页 -->
+    <url>
+        <loc>https://qh.ossou.cn/login</loc>
+        <lastmod>2026-01-31</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <!-- 管理后台（仅用于告知存在，实际会被robots禁止） -->
+    <url>
+        <loc>https://qh.ossou.cn/admin</loc>
+        <lastmod>2026-01-31</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.3</priority>
+    </url>
+    
+</urlset>

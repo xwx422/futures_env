@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据更新 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2128;
+            --bg-elevated: #21262d;
+            --bg-hover: #262c36;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-purple: #a371f7;
+            --neon-cyan: #39c5cf;
+            --neon-yellow: #d29922;
+            --neon-orange: #f0883e;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+
+        .nav-btn-primary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-primary:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .nav-btn-logout {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-logout:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-blue), #0066cc);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--neon-green), #2ea043);
+            color: white;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(63, 185, 80, 0.3);
+        }
+
+        /* 表格样式 */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--bg-elevated);
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .table tbody tr:hover {
+            background: var(--bg-hover);
+        }
+
+        /* 徽章样式 */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--neon-green);
+        }
+
+        .badge-danger {
+            background: rgba(248, 81, 73, 0.15);
+            color: var(--neon-red);
+        }
+
+        .badge-info {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--neon-blue);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* 信息框 */
+        .info-box {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+        }
+
+        .info-box-title {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box ul {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+
+        .info-box li {
+            margin-bottom: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" style="background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, #a371f7, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⚙️ 管理后台</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="/xwx422" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                <span>←</span> 返回控制台
+            </a>
+            <a href="/dashboard" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                📊 数据展示
+            </a>
+            <a href="/change_password" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                🔐 修改密码
+            </a>
+            <a href="/logout" style="background: transparent; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#f85149'; this.style.color='#f85149';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                退出
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">期货数据管理</h1>
+            <p class="page-subtitle">更新与查看期货品种数据</p>
+        </div>
+
+        <!-- 操作卡片 -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- 更新数据 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-sync-alt" style="color: var(--neon-blue);"></i>
+                        更新期货数据
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.875rem;">
+                        触发期货品种数据分析，系统将自动获取最新行情并生成AI分析报告。
+                    </p>
+                    <div class="info-box">
+                        <div class="info-box-title">
+                            <i class="fas fa-info-circle"></i> 说明
+                        </div>
+                        <ul>
+                            <li>更新过程可能需要几分钟，请耐心等待</li>
+                            <li>系统会自动分析所有配置的品种</li>
+                            <li>更新完成后可在"查看数据"中查看结果</li>
+                        </ul>
+                    </div>
+                    <button onclick="startUpdate()" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-play"></i>
+                        开始更新数据
+                    </button>
+                </div>
+            </div>
+
+            <!-- 查看数据 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-table" style="color: var(--neon-green);"></i>
+                        查看分析数据
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.875rem;">
+                        查看已生成的期货品种分析报告，支持按品种、日期筛选。
+                    </p>
+                    <div class="info-box">
+                        <div class="info-box-title">
+                            <i class="fas fa-info-circle"></i> 数据概览
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.8125rem;">
+                            <div style="color: var(--text-secondary);">
+                                <i class="fas fa-database" style="color: var(--neon-blue); margin-right: 0.25rem;"></i>
+                                分析记录: {{ stats.total_records }} 条
+                            </div>
+                            <div style="color: var(--text-secondary);">
+                                <i class="fas fa-list" style="color: var(--neon-green); margin-right: 0.25rem;"></i>
+                                品种数量: {{ stats.total_varieties }} 个
+                            </div>
+                            <div style="color: var(--text-secondary);">
+                                <i class="fas fa-calendar" style="color: var(--neon-purple); margin-right: 0.25rem;"></i>
+                                最新更新: {{ stats.latest_update }}
+                            </div>
+                            <div style="color: var(--text-secondary);">
+                                <i class="fas fa-clock" style="color: var(--neon-orange); margin-right: 0.25rem;"></i>
+                                数据范围: {{ stats.date_range }}
+                            </div>
+                        </div>
+                    </div>
+                    <a href="/xwx422/analysis" class="btn btn-success" style="width: 100%; text-decoration: none;">
+                        <i class="fas fa-search"></i>
+                        查看详细数据
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 更新日志 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-history" style="color: var(--neon-purple);"></i>
+                    最近更新记录
+                </div>
+                <a href="/xwx422/logs/update" class="btn" style="background: var(--bg-elevated); border: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8125rem; text-decoration: none;">
+                    查看全部
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>操作员</th>
+                                <th>品种数</th>
+                                <th>成功</th>
+                                <th>失败</th>
+                                <th>耗时</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td>{{ log.update_time }}</td>
+                                <td>{{ log.username }}</td>
+                                <td>{{ log.varieties_count or '-' }}</td>
+                                <td style="color: var(--neon-green);">{{ log.success_count or 0 }}</td>
+                                <td style="color: var(--neon-red);">{{ log.failed_count or 0 }}</td>
+                                <td>{{ log.duration_seconds or '-' }} 秒</td>
+                                <td>
+                                    {% if log.status == 'success' %}
+                                    <span class="badge badge-success">成功</span>
+                                    {% elif log.status == 'running' %}
+                                    <span class="badge badge-info">运行中</span>
+                                    {% else %}
+                                    <span class="badge badge-danger">失败</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">📭</div>
+                                        <div style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 0.5rem;">暂无更新记录</div>
+                                        <p>点击上方"开始更新数据"按钮开始第一次更新</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function startUpdate() {
+        if (confirm('确定要开始更新期货数据吗？\n\n更新过程可能需要几分钟，请耐心等待。')) {
+            fetch('/api/update_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(async r => {
+                if (!r.ok) {
+                    const text = await r.text();
+                    throw new Error(`HTTP ${r.status}: ${text}`);
+                }
+                return r.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('✅ 数据更新已启动，请稍后查看结果。');
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    alert('❌ 启动失败: ' + (data.error || '未知错误'));
+                }
+            })
+            .catch(e => {
+                alert('❌ 请求失败: ' + e.message);
+            });
+        }
+    }
+    </script>
+</body>
+</html>

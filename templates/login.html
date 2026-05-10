@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #05080f;
+            --bg-card: rgba(16, 20, 30, 0.6);
+            --text-primary: #f0f2f5;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-blue: #38bdf8;
+            --accent-cyan: #22d3ee;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --radius-xl: 16px;
+            --radius-lg: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background:
+                radial-gradient(ellipse at 20% 0%, rgba(56, 189, 248, 0.1) 0%, transparent 45%),
+                radial-gradient(ellipse at 80% 100%, rgba(167, 139, 250, 0.08) 0%, transparent 45%),
+                var(--bg-deep);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .page-center {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        /* ===== 顶部品牌区 ===== */
+        .brand {
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .brand-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+        }
+
+        .brand-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* ===== 玻璃卡片 ===== */
+        .glass-card {
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255,255,255,0.04);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+        }
+
+        /* ===== 登录表单区 ===== */
+        .login-body {
+            padding: 1.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.875rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.375rem;
+            font-weight: 500;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 0.875rem 0.75rem 2.5rem;
+            background: rgba(8, 10, 16, 0.45);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(8, 10, 16, 0.6);
+        }
+
+        .input-wrap:focus-within .input-icon {
+            color: var(--accent-blue);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-top: 0.375rem;
+            background: linear-gradient(135deg, rgba(56,189,248,0.95), rgba(34,211,238,0.95));
+            color: #020617;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
+        }
+
+        .login-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.25rem 0;
+            color: var(--text-muted);
+            font-size: 0.6875rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        .register-section {
+            text-align: center;
+        }
+
+        .register-hint {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .register-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.45rem 1rem;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .register-link:hover {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.18);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 0.625rem 0.875rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        /* ===== 客服二维码区（卡片底部） ===== */
+        .service-band {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .service-qr {
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+        }
+
+        .service-qr img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .service-text {
+            text-align: left;
+        }
+
+        .service-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.125rem;
+        }
+
+        .service-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 0.25rem;
+        }
+
+        .service-tip {
+            font-size: 0.6875rem;
+            color: var(--accent-blue);
+            font-weight: 500;
+        }
+
+        /* ===== 行情推送侧边栏 ===== */
+        .market-push-sidebar {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+        }
+
+        .market-push-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 120px;
+            background: linear-gradient(180deg, rgba(26,39,68,0.9) 0%, rgba(13,21,37,0.95) 100%);
+            border: 1px solid var(--border-color);
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            backdrop-filter: blur(8px);
+        }
+
+        .market-push-trigger span {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            letter-spacing: 2px;
+        }
+
+        .market-push-trigger:hover {
+            background: linear-gradient(180deg, rgba(56,189,248,0.15) 0%, rgba(13,21,37,0.95) 100%);
+            box-shadow: -2px 0 16px rgba(56, 189, 248, 0.2);
+        }
+
+        .market-push-trigger:hover span {
+            color: #fff;
+        }
+
+        .market-push-panel {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%) translateX(100%);
+            width: 180px;
+            background: linear-gradient(180deg, rgba(22,27,34,0.95) 0%, rgba(13,21,37,0.98) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px 0 0 12px;
+            padding: 14px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .market-push-sidebar:hover .market-push-panel {
+            transform: translateY(-50%) translateX(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .qr-module {
+            text-align: center;
+            padding: 10px;
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px solid rgba(56, 189, 248, 0.12);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-module:last-child { margin-bottom: 0; }
+
+        .qr-module-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        .qr-module-subtitle {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .qr-module img {
+            width: 96px;
+            height: 96px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-center">
+        <!-- 品牌区 -->
+        <div class="brand">
+            <h1 class="brand-title">AI期货分析助手</h1>
+            <p class="brand-subtitle">AI 驱动的多周期量化分析系统</p>
+            <span class="brand-badge"><span>✨</span><span>已服务 2000+ 期货投资者</span></span>
+        </div>
+
+        <!-- 登录卡片 -->
+        <div class="glass-card">
+            <div class="login-body">
+                {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="form-group">
+                        <label class="form-label" for="username">用户名</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">👤</span>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                class="form-input" 
+                                placeholder="请输入用户名"
+                                required
+                                autofocus
+                                autocomplete="username"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">密码</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">🔒</span>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-input" 
+                                placeholder="请输入密码"
+                                required
+                                autocomplete="current-password"
+                            >
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-button">登 录</button>
+                </form>
+
+                <div class="divider">或</div>
+
+                <div class="register-section">
+                    <p class="register-hint">还没有账号？</p>
+                    <a href="{{ url_for('register') }}" class="register-link">
+                        <span>🔑</span>
+                        <span>立即注册</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 客服二维码 -->
+            <div class="service-band">
+                <div class="service-qr">
+                    <img src="/static/images/code.jpg" alt="客服微信">
+                </div>
+                <div class="service-text">
+                    <div class="service-title">专属客服</div>
+                    <div class="service-desc">登录遇到问题请扫码联系</div>
+                    <div class="service-tip">👆 扫码联系客服</div>
+                </div>
+            </div>
+        </div>
+
+        <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+            登录后可获得 50 个主流品种的完整 AI 分析数据
+        </p>
+    </div>
+
+    <!-- 行情推送侧边栏 -->
+    <div class="market-push-sidebar">
+        <div class="market-push-trigger">
+            <span>行情推送</span>
+        </div>
+        <div class="market-push-panel">
+            <div class="qr-module">
+                <div class="qr-module-title">行情推送</div>
+                <div class="qr-module-subtitle">每日早盘+实时异动提醒</div>
+                <img src="/static/images/gzh.jpg" alt="行情推送" onerror="this.src='/static/images/code.jpg'">
+            </div>
+            <div class="qr-module">
+                <div class="qr-module-title">客服微信</div>
+                <div class="qr-module-subtitle">技术支持</div>
+                <img src="/static/images/code.jpg" alt="客服微信">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) usernameInput.focus();
+        });
+    </script>
+</body>
+</html>

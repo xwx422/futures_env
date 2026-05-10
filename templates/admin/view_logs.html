@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>期货查看日志 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --bg-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-purple: #a371f7;
+            --neon-cyan: #39c5cf;
+            --neon-yellow: #d29922;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn-primary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-primary:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .nav-btn-logout {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-logout:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-input {
+            padding: 0.5rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+        }
+
+        .filter-select {
+            padding: 0.5rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--neon-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1f6feb;
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        /* 表格 */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.125rem;
+        }
+
+        .table-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        tr:hover {
+            background: var(--bg-elevated);
+        }
+
+        .variety-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(88, 166, 255, 0.15);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            color: var(--neon-blue);
+            font-weight: 500;
+        }
+
+        .variety-code {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .page-link {
+            padding: 0.5rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .page-link.active {
+            background: var(--neon-blue);
+            border-color: var(--neon-blue);
+            color: white;
+        }
+
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" style="background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, #a371f7, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⚙️ 管理后台</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="/xwx422" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                <span>←</span> 返回控制台
+            </a>
+            <a href="/dashboard" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                📊 数据展示
+            </a>
+            <a href="/change_password" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                🔐 修改密码
+            </a>
+            <a href="/logout" style="background: transparent; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#f85149'; this.style.color='#f85149';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                退出
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">👁️ 期货查看日志</h1>
+        </div>
+
+        <!-- 筛选栏 -->
+        <form class="filter-bar" method="GET" action="{{ url_for('admin_view_logs') }}">
+            <input type="text" name="username" class="filter-input" placeholder="搜索会员账号..." value="{{ username }}">
+            <select name="variety_code" class="filter-select">
+                <option value="">全部品种</option>
+                {% for v in varieties %}
+                <option value="{{ v.variety_code }}" {% if variety_code == v.variety_code %}selected{% endif %}>
+                    {{ v.variety_name }} ({{ v.variety_code }})
+                </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">筛选</button>
+            <a href="{{ url_for('admin_view_logs') }}" class="btn btn-secondary">重置</a>
+        </form>
+
+        <!-- 日志列表 -->
+        <div class="table-card">
+            <div class="table-header">
+                <div>
+                    <h2 class="table-title">查看记录</h2>
+                    <p class="table-subtitle">共 {{ total }} 条记录</p>
+                </div>
+            </div>
+            {% if logs %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>会员账号</th>
+                        <th>查看时间</th>
+                        <th>期货品种</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.username }}</td>
+                        <td>{{ log.view_time }}</td>
+                        <td>
+                            <span class="variety-badge">
+                                {{ log.variety_name }}
+                                <span class="variety-code">{{ log.variety_code }}</span>
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- 分页 -->
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="{{ url_for('admin_view_logs', page=page-1, username=username, variety_code=variety_code) }}" class="page-link">← 上一页</a>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <span class="page-link active">{{ p }}</span>
+                    {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                    <a href="{{ url_for('admin_view_logs', page=p, username=username, variety_code=variety_code) }}" class="page-link">{{ p }}</a>
+                    {% elif p == page - 3 or p == page + 3 %}
+                    <span class="page-link disabled">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <a href="{{ url_for('admin_view_logs', page=page+1, username=username, variety_code=variety_code) }}" class="page-link">下一页 →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="empty-state">
+                <p>暂无查看记录</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

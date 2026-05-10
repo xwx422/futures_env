@@ -1,0 +1,47 @@
+# 虚拟环境
+venv/
+ENV/
+
+# 环境变量（含密钥）
+.env
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS 系统文件
+.DS_Store
+
+# Git 备份目录
+.git_backup*/
+
+# 模型文件
+*.pth
+*.bin
+models/
+
+# 数据库文件
+*.db
+instance/
+
+# 日志文件
+logs/
+
+# Celery 调度文件
+celerybeat-schedule
+celerybeat-schedule.db
+
+# ==================== 核心闭源模块 ====================
+# 以下为核心分析引擎，商业闭源，不上传到公开仓库
+# 如需完整功能，请访问：https://qh.ossou.cn
+
+analysis_layer/
+execution_layer/
+data_layer/
+
+# ==================== 补充说明 ====================
+# 如果需要保留目录结构但排除文件内容，可以用以下方式：
+# 在对应目录下创建 .gitkeep 文件，然后排除其他文件
+# analysis_layer/*
+# !analysis_layer/.gitkeep

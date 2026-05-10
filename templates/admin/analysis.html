@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据统计分析 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --bg-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-purple: #a371f7;
+            --neon-cyan: #39c5cf;
+            --neon-yellow: #d29922;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn-primary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-primary:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .nav-btn-logout {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-logout:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 内容网格 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 列表样式 */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .rank {
+            width: 24px;
+            height: 24px;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .rank.top3 {
+            background: var(--neon-blue);
+            color: white;
+        }
+
+        .list-name {
+            font-weight: 500;
+        }
+
+        .list-value {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .list-value.highlight {
+            color: var(--neon-blue);
+            font-weight: 600;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.blue { background: var(--neon-blue); }
+        .progress-fill.green { background: var(--neon-green); }
+        .progress-fill.yellow { background: var(--neon-yellow); }
+        .progress-fill.red { background: var(--neon-red); }
+        .progress-fill.purple { background: var(--neon-purple); }
+
+        /* 分布图例 */
+        .distribution-item {
+            margin-bottom: 1.25rem;
+        }
+
+        .distribution-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .distribution-label {
+            color: var(--text-secondary);
+        }
+
+        .distribution-value {
+            font-weight: 600;
+        }
+
+        /* 趋势数据 */
+        .trend-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .trend-item:last-child {
+            border-bottom: none;
+        }
+
+        .trend-date {
+            color: var(--text-secondary);
+        }
+
+        .trend-value {
+            font-weight: 600;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        /* 板块标签 */
+        .sector-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(88, 166, 255, 0.15);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            color: var(--neon-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" style="background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, #a371f7, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⚙️ 管理后台</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="/xwx422" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                <span>←</span> 返回控制台
+            </a>
+            <a href="/dashboard" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                📊 数据展示
+            </a>
+            <a href="/change_password" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                🔐 修改密码
+            </a>
+            <a href="/logout" style="background: transparent; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#f85149'; this.style.color='#f85149';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                退出
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">📊 数据统计分析</h1>
+            <p style="color: var(--text-secondary);">数据范围：最近30天</p>
+        </div>
+
+        <div class="content-grid">
+            <!-- 品种查看热度排行 -->
+            <div class="card">
+                <h2 class="card-title">🔥 热门期货品种</h2>
+                {% if analysis.hot_varieties %}
+                    {% for item in analysis.hot_varieties %}
+                    <div class="list-item">
+                        <div class="list-label">
+                            <span class="rank {{ 'top3' if loop.index <= 3 else '' }}">{{ loop.index }}</span>
+                            <span class="list-name">{{ item.variety_name }}</span>
+                        </div>
+                        <span class="list-value highlight">{{ item.view_count }} 次</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">暂无数据</div>
+                {% endif %}
+            </div>
+
+            <!-- 活跃用户排行 -->
+            <div class="card">
+                <h2 class="card-title">👥 活跃会员排行</h2>
+                {% if analysis.active_users %}
+                    {% for item in analysis.active_users %}
+                    <div class="list-item">
+                        <div class="list-label">
+                            <span class="rank {{ 'top3' if loop.index <= 3 else '' }}">{{ loop.index }}</span>
+                            <span class="list-name">{{ item.username }}</span>
+                        </div>
+                        <span class="list-value highlight">{{ item.view_count }} 次</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">暂无数据</div>
+                {% endif %}
+            </div>
+
+            <!-- 胜率分布 -->
+            <div class="card">
+                <h2 class="card-title">📈 品种胜率分布</h2>
+                {% if analysis.probability_distribution %}
+                    {% set total = analysis.probability_distribution|sum(attribute='count') %}
+                    {% for item in analysis.probability_distribution %}
+                    {% set percentage = (item.count / total * 100) if total > 0 else 0 %}
+                    <div class="distribution-item">
+                        <div class="distribution-header">
+                            <span class="distribution-label">{{ item.probability_level }}</span>
+                            <span class="distribution-value">{{ item.count }} 个 ({{ "%.1f"|format(percentage) }}%)</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill {{ 'green' if '高' in item.probability_level else 'yellow' if '中' in item.probability_level else 'red' }}" 
+                                 style="width: {{ percentage }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">暂无数据</div>
+                {% endif %}
+            </div>
+
+            <!-- 板块统计 -->
+            <div class="card">
+                <h2 class="card-title">🏭 板块分布统计</h2>
+                {% if analysis.sector_stats %}
+                    {% for item in analysis.sector_stats %}
+                    <div class="list-item">
+                        <div class="list-label">
+                            <span class="sector-tag">{{ item.sector }}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="list-value highlight">{{ item.count }} 个品种</div>
+                            <div class="list-value">平均胜率 {{ "%.1f"|format(item.avg_probability) }}%</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">暂无数据</div>
+                {% endif %}
+            </div>
+
+            <!-- 品种更新趋势 -->
+            <div class="card">
+                <h2 class="card-title">📅 品种更新趋势</h2>
+                {% if analysis.update_trend.recent %}
+                    <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-secondary); font-size: 0.875rem;">近30天更新品种</span>
+                            <span style="font-size: 1.5rem; font-weight: 700; color: var(--neon-blue);">{{ analysis.update_trend.recent|sum(attribute='variety_count') + analysis.update_trend.earlier_varieties }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+                            <span>最近7天: {{ analysis.update_trend.recent|sum(attribute='variety_count') }} 次</span>
+                            {% if analysis.update_trend.earlier_days > 0 %}
+                            <span>更早{{ analysis.update_trend.earlier_days }}天: {{ analysis.update_trend.earlier_varieties }} 次</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        {% for item in analysis.update_trend.recent %}
+                        <div class="trend-item">
+                            <span class="trend-date">{{ item.date }}</span>
+                            <span class="trend-value">{{ item.variety_count }} 个品种</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">暂无数据</div>
+                {% endif %}
+            </div>
+
+            <!-- 登录成功率统计 -->
+            <div class="card">
+                <h2 class="card-title">🔐 登录统计</h2>
+                {% if analysis.login_stats.summary.total > 0 %}
+                    {% set summary = analysis.login_stats.summary %}
+                    {% set success_rate = (summary.success / summary.total * 100) if summary.total > 0 else 0 %}
+                    <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div style="text-align: center; flex: 1;">
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--neon-blue);">{{ summary.total }}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">总登录</div>
+                            </div>
+                            <div style="text-align: center; flex: 1;">
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--neon-green);">{{ summary.success }}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">成功</div>
+                            </div>
+                            <div style="text-align: center; flex: 1;">
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--neon-red);">{{ summary.failed }}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">失败</div>
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.25rem; font-weight: 600; color: var(--neon-green);">{{ "%.1f"|format(success_rate) }}%</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">成功率</div>
+                        </div>
+                    </div>
+                    {% if analysis.login_stats.trend %}
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.75rem;">最近7天趋势:</div>
+                    <div style="max-height: 150px; overflow-y: auto;">
+                        {% for item in analysis.login_stats.trend %}
+                        {% set daily_rate = (item.success_count / item.total_count * 100) if item.total_count > 0 else 0 %}
+                        <div class="trend-item">
+                            <span class="trend-date">{{ item.date }}</span>
+                            <span class="trend-value" style="color: {% if daily_rate >= 90 %}var(--neon-green){% elif daily_rate >= 70 %}var(--neon-yellow){% else %}var(--neon-red){% endif %}">{{ item.total_count }}次 ({{ "%.0f"|format(daily_rate) }}%)</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state">暂无数据</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

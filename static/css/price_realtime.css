@@ -1,0 +1,331 @@
+/**
+ * 实时价格模块样式
+ */
+
+/* 价格上涨颜色 */
+.price-up-flash {
+    animation: flashGreen 0.5s ease-in-out;
+}
+
+/* 价格下跌颜色 */
+.price-down-flash {
+    animation: flashRed 0.5s ease-in-out;
+}
+
+@keyframes flashGreen {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(34, 197, 94, 0.3); }
+}
+
+@keyframes flashRed {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(239, 68, 68, 0.3); }
+}
+
+/* 涨跌颜色 - 红涨绿跌（符合中国期货习惯）*/
+.price.up,
+.change-percent.up,
+.change-value.up {
+    color: #ef4444 !important;  /* 红色 - 上涨 */
+}
+
+.price.down,
+.change-percent.down,
+.change-value.down {
+    color: #22c55e !important;  /* 绿色 - 下跌 */
+}
+
+/* 刷新按钮 */
+#refresh-prices-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#refresh-prices-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+#refresh-prices-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#refresh-prices-btn .loading {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.6s linear infinite;
+    margin-right: 6px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 更新时间 */
+#price-update-time {
+    font-size: 12px;
+    color: #6b7280;
+    margin-left: 12px;
+}
+
+/* 涨跌排行榜 */
+#price-stats {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+}
+
+#price-stats .stats-row {
+    display: flex;
+    gap: 32px;
+}
+
+#price-stats .stats-col {
+    flex: 1;
+}
+
+#price-stats .stats-col h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+#price-stats .stats-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#price-stats .stats-col li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+#price-stats .stats-col li span {
+    font-weight: 600;
+}
+
+/* Toast 通知 */
+.price-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    z-index: 9999;
+    animation: slideInRight 0.3s ease-out;
+    min-width: 280px;
+}
+
+.price-toast.toast-up {
+    border-left: 4px solid #22c55e;
+}
+
+.price-toast.toast-down {
+    border-left: 4px solid #ef4444;
+}
+
+.price-toast .toast-icon {
+    font-size: 24px;
+}
+
+.price-toast .toast-content {
+    flex: 1;
+}
+
+.price-toast .toast-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.price-toast .toast-message {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.price-toast.toast-hide {
+    animation: slideOutRight 0.3s ease-out forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* 简单 Toast */
+.simple-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: #1f2937;
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10000;
+    animation: fadeInDown 0.3s ease-out;
+}
+
+.simple-toast.success {
+    background: #22c55e;
+}
+
+.simple-toast.error {
+    background: #ef4444;
+}
+
+.simple-toast.info {
+    background: #3b82f6;
+}
+
+.simple-toast.toast-hide {
+    animation: fadeOutUp 0.3s ease-out forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        transform: translateX(-50%) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOutUp {
+    from {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-50%) translateY(-20px);
+        opacity: 0;
+    }
+}
+
+/* 价格卡片 */
+.price-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+}
+
+.price-card .price-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.price-card .price-header .variety-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.price-card .price-header .variety-code {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-left: 8px;
+}
+
+.price-card .current-price {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.price-card .price-change {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+}
+
+.price-card .price-change .change-percent {
+    font-weight: 600;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .price-toast {
+        left: 20px;
+        right: 20px;
+        top: auto;
+        bottom: 20px;
+        min-width: auto;
+    }
+    
+    .price-toolbar {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .price-toolbar-left,
+    .price-toolbar-right {
+        width: 100%;
+    }
+    
+    .price-toolbar-right {
+        justify-content: flex-start;
+    }
+    
+    .price-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-col {
+        margin-bottom: 1rem;
+    }
+}

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务健康监控 - 管理后台</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-purple: #a371f7;
+            --neon-yellow: #d29922;
+            --border-color: #30363d;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 1.25rem; font-weight: 700; color: var(--neon-purple); text-decoration: none; }
+        .nav-links { display: flex; gap: 1rem; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--neon-blue); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+        .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .page-subtitle { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem; }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        .metric-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .metric-value.up { color: var(--neon-green); }
+        .metric-value.down { color: var(--neon-red); }
+        .metric-value.neutral { color: var(--neon-yellow); }
+        .metric-label { font-size: 0.75rem; color: var(--text-muted); }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+        .status-row:last-child { border-bottom: none; }
+        .status-label { color: var(--text-secondary); }
+        .status-value { font-weight: 500; }
+        .status-value.up { color: var(--neon-green); }
+        .status-value.down { color: var(--neon-red); }
+        .status-value.neutral { color: var(--neon-yellow); }
+        .alert {
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid transparent;
+        }
+        .alert.warning { background: rgba(210,153,34,0.08); border-color: rgba(210,153,34,0.25); color: var(--neon-yellow); }
+        .alert.danger { background: rgba(248,81,73,0.08); border-color: rgba(248,81,73,0.25); color: var(--neon-red); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/xwx422" class="logo">管理后台</a>
+        <div class="nav-links">
+            <a href="/xwx422">首页</a>
+            <a href="/dashboard">返回前台</a>
+            <a href="/logout">退出</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-title">💓 任务健康监控</div>
+        <div class="page-subtitle">核心服务与数据状态</div>
+
+        <!-- Celery 服务状态 -->
+        <div class="card">
+            <div class="card-title">⚙️ Celery 服务状态</div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value {{ 'up' if health.celery.beat_running else 'down' }}">{{ '运行中' if health.celery.beat_running else '未运行' }}</div>
+                    <div class="metric-label">Celery Beat（定时调度）</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value {{ 'up' if health.celery.worker_running else 'down' }}">{{ '运行中' if health.celery.worker_running else '未运行' }}</div>
+                    <div class="metric-label">Celery Worker（任务执行）</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value {{ 'up' if health.celery.redis_ok else 'down' }}">{{ '正常' if health.celery.redis_ok else '异常' }}</div>
+                    <div class="metric-label">Redis（消息队列）</div>
+                </div>
+            </div>
+            {% if not health.celery.beat_running %}
+            <div class="alert danger" style="margin-top: 0.75rem;">
+                <strong>⚠️ Celery Beat 未运行！</strong>定时分析任务不会自动执行。
+                请在服务器上执行：<code>sudo systemctl start futures-ai-beat</code>
+            </div>
+            {% endif %}
+            {% if not health.celery.worker_running %}
+            <div class="alert danger" style="margin-top: 0.75rem;">
+                <strong>⚠️ Celery Worker 未运行！</strong>即使 Beat 调度了任务，也无法执行。
+                请在服务器上执行：<code>sudo systemctl start futures-ai-celery</code>
+            </div>
+            {% endif %}
+            {% if not health.celery.redis_ok %}
+            <div class="alert warning" style="margin-top: 0.75rem;">
+                <strong>⚠️ Redis 连接异常！</strong>Celery 依赖 Redis 作为消息队列，请检查 Redis 服务。
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 全量分析 -->
+        <div class="card">
+            <div class="card-title">🔄 全量分析任务</div>
+            {% if health.last_analysis %}
+            <div class="status-row">
+                <span class="status-label">最近执行时间</span>
+                <span class="status-value">{{ health.last_analysis.update_time }}</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">执行状态</span>
+                <span class="status-value {{ 'up' if health.last_analysis.status == 'success' else 'down' }}">{{ health.last_analysis.status }}</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">成功 / 失败品种数</span>
+                <span class="status-value">{{ health.last_analysis.success_count or 0 }} / {{ health.last_analysis.failed_count or 0 }}</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">结果摘要</span>
+                <span class="status-value" style="text-align: right; max-width: 60%;">{{ health.last_analysis.message }}</span>
+            </div>
+            {% else %}
+            <div style="padding: 1rem; text-align: center; color: var(--text-muted);">暂无分析记录</div>
+            {% endif %}
+        </div>
+
+        <!-- 基差数据 -->
+        <div class="card">
+            <div class="card-title">📊 基差数据</div>
+            <div class="status-row">
+                <span class="status-label">最新基差数据日期</span>
+                <span class="status-value {{ 'up' if health.basis_data.latest else 'down' }}">{{ health.basis_data.latest or '无数据' }}</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">覆盖品种数</span>
+                <span class="status-value {{ 'up' if health.basis_data.varieties >= 10 else ('neutral' if health.basis_data.varieties > 0 else 'down') }}">{{ health.basis_data.varieties }}</span>
+            </div>
+        </div>
+
+        <!-- 定时任务说明 -->
+        <div class="card">
+            <div class="card-title">📋 定时任务配置</div>
+            <div class="status-row">
+                <span class="status-label">全量分析（早盘前）</span>
+                <span class="status-value">每日 8:25</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">全量分析（午盘前）</span>
+                <span class="status-value">每日 13:00</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">全量分析（定时轮询）</span>
+                <span class="status-value">每 4 小时</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">价格刷新</span>
+                <span class="status-value">每 3 分钟（交易时段）</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

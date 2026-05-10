@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --bg-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-purple: #a371f7;
+            --neon-yellow: #d29922;
+            --neon-orange: #f0883e;
+            --neon-cyan: #39c5cf;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn-primary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-primary:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .nav-btn-logout {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .nav-btn-logout:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+        }
+
+        /* 统计卡片网格 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.blue { background: rgba(88, 166, 255, 0.1); color: var(--neon-blue); }
+        .stat-icon.green { background: rgba(63, 185, 80, 0.1); color: var(--neon-green); }
+        .stat-icon.red { background: rgba(248, 81, 73, 0.1); color: var(--neon-red); }
+        .stat-icon.purple { background: rgba(163, 113, 247, 0.1); color: var(--neon-purple); }
+        .stat-icon.orange { background: rgba(240, 136, 62, 0.1); color: var(--neon-orange); }
+        .stat-icon.cyan { background: rgba(57, 197, 207, 0.1); color: var(--neon-cyan); }
+        .stat-icon.yellow { background: rgba(210, 153, 34, 0.1); color: var(--neon-yellow); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* ========== 精美统计模块样式 ========== */
+        
+        /* 统计容器 */
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-bottom: 3rem;
+        }
+
+        /* ===== 板块通用样式 ===== */
+        .stats-section {
+            background: linear-gradient(145deg, var(--bg-card), rgba(22, 27, 34, 0.8));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stats-section:hover {
+            border-color: rgba(88, 166, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(88, 166, 255, 0.05);
+        }
+
+        .stats-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stats-section-title .section-icon {
+            font-size: 1rem;
+            filter: saturate(1.2);
+        }
+
+        /* ===== 会员总览 - 极简数字风 ===== */
+        .stats-grid-compact {
+            display: grid;
+            grid-template-columns: 1.2fr 0.9fr 0.9fr;
+            gap: 0.75rem;
+        }
+
+        .stat-card-compact {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem 0.75rem;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-compact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-color, var(--neon-blue)), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card-compact:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-color, var(--border-hover));
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .stat-card-compact:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card-primary {
+            --accent-color: var(--neon-blue);
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(163, 113, 247, 0.05));
+        }
+
+        .stat-card-primary .compact-total {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .compact-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .text-yellow { 
+            color: var(--neon-yellow);
+            --accent-color: var(--neon-yellow);
+        }
+        .text-red { 
+            color: var(--neon-red);
+            --accent-color: var(--neon-red);
+        }
+
+        .compact-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .compact-breakdown {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .compact-tag {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1px solid transparent;
+        }
+
+        .tag-trial {
+            background: rgba(210, 153, 34, 0.12);
+            color: var(--neon-yellow);
+            border-color: rgba(210, 153, 34, 0.25);
+        }
+
+        .tag-formal {
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--neon-green);
+            border-color: rgba(63, 185, 80, 0.25);
+        }
+
+        /* ===== 横排布局 ===== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .stats-section-half {
+            margin: 0;
+        }
+
+        /* ===== 注册开通 - 卡片式 ===== */
+        .stats-grid-timeline {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .timeline-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .timeline-card::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 12px;
+            padding: 1px;
+            background: linear-gradient(135deg, var(--card-accent, transparent) 0%, transparent 50%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .timeline-card:hover {
+            transform: translateY(-3px);
+            background: var(--bg-elevated);
+        }
+
+        .timeline-card:hover::after {
+            opacity: 1;
+        }
+
+        .timeline-card:nth-child(1) { --card-accent: var(--neon-red); }
+        .timeline-card:nth-child(2) { --card-accent: var(--neon-yellow); }
+        .timeline-card:nth-child(3) { --card-accent: var(--neon-blue); }
+
+        .timeline-header {
+            margin-bottom: 0.75rem;
+        }
+
+        .timeline-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .timeline-badge.today {
+            background: linear-gradient(135deg, rgba(248, 81, 73, 0.2), rgba(248, 81, 73, 0.1));
+            color: var(--neon-red);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+        }
+
+        .timeline-badge.week {
+            background: linear-gradient(135deg, rgba(210, 153, 34, 0.2), rgba(210, 153, 34, 0.1));
+            color: var(--neon-yellow);
+            border: 1px solid rgba(210, 153, 34, 0.3);
+        }
+
+        .timeline-badge.month {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.2), rgba(88, 166, 255, 0.1));
+            color: var(--neon-blue);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+        }
+
+        .timeline-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
+        .timeline-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.375rem 0;
+        }
+
+        .timeline-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .timeline-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timeline-value.trial {
+            color: var(--neon-yellow);
+        }
+
+        .timeline-value.formal {
+            color: var(--neon-green);
+        }
+
+        /* ===== 登录统计 - 极简图标风 ===== */
+        .stats-grid-login {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .login-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            background: radial-gradient(circle at top, var(--login-accent, transparent) 0%, transparent 70%);
+            opacity: 0.1;
+            transition: opacity 0.3s;
+        }
+
+        .login-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--login-accent, var(--border-hover));
+        }
+
+        .login-card:hover::before {
+            opacity: 0.2;
+        }
+
+        .login-today { --login-accent: var(--neon-red); }
+        .login-week { --login-accent: var(--neon-yellow); }
+        .login-month { --login-accent: var(--neon-blue); }
+
+        .login-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .login-card:hover .login-icon {
+            transform: scale(1.1);
+            border-color: var(--login-accent);
+            box-shadow: 0 0 20px var(--login-accent, transparent);
+        }
+
+        .login-today .login-icon {
+            background: rgba(248, 81, 73, 0.1);
+            color: var(--neon-red);
+        }
+
+        .login-week .login-icon {
+            background: rgba(210, 153, 34, 0.1);
+            color: var(--neon-yellow);
+        }
+
+        .login-month .login-icon {
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--neon-blue);
+        }
+
+        .login-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-top: 0.25rem;
+        }
+
+        .login-today .login-value { color: var(--neon-red); }
+        .login-week .login-value { color: var(--neon-yellow); }
+        .login-month .login-value { color: var(--neon-blue); }
+
+        .login-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ===== 响应式适配 ===== */
+        @media (max-width: 1200px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid-compact {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid-timeline,
+            .stats-grid-login {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 功能分组区域 */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* 功能菜单 */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .menu-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-card:hover {
+            border-color: var(--neon-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.1);
+        }
+
+        .menu-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .menu-content h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .menu-content p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .badge-danger {
+            background: rgba(248, 81, 73, 0.15);
+            color: var(--neon-red);
+        }
+
+        /* Flash 消息 */
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-error {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+            color: var(--neon-red);
+        }
+
+        .alert-success {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            color: var(--neon-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" style="background: #161b22; border-bottom: 1px solid #30363d; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+        <div style="font-size: 1.25rem; font-weight: 700; background: linear-gradient(135deg, #a371f7, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⚙️ 管理后台</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="/dashboard" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                📊 数据展示
+            </a>
+            <a href="/change_password" style="background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#58a6ff'; this.style.color='#58a6ff';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                🔐 修改密码
+            </a>
+            <a href="/logout" style="background: transparent; border: 1px solid #30363d; color: #8b949e; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#f85149'; this.style.color='#f85149';" onmouseout="this.style.borderColor='#30363d'; this.style.color='#8b949e';">
+                退出
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <h1 class="page-title">管理控制台</h1>
+        <p class="page-subtitle">当前登录：{{ session.username }}（管理员）</p>
+
+        <!-- Flash 消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- 统计概览 -->
+        <div class="stats-container">
+            <!-- 第一行：会员总览 -->
+            <div class="stats-section">
+                <h3 class="stats-section-title">
+                    <span class="section-icon">👥</span>
+                    会员总览
+                </h3>
+                <div class="stats-grid-compact">
+                    <div class="stat-card-compact stat-card-primary">
+                        <div class="compact-total">{{ stats.total_members }}</div>
+                        <div class="compact-label">总用户</div>
+                        <div class="compact-breakdown">
+                            <span class="compact-tag" style="background:rgba(88,166,255,0.12);color:var(--neon-blue);border-color:rgba(88,166,255,0.25);">管理员 {{ stats.admin_count }}</span>
+                            <span class="compact-tag tag-formal">会员 {{ stats.member_count }}</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-compact text-green">
+                        <div class="compact-value">{{ stats.today_active_users }}</div>
+                        <div class="compact-label">今日活跃</div>
+                    </div>
+                    <div class="stat-card-compact text-yellow">
+                        <div class="compact-value">{{ stats.today_registrations }}</div>
+                        <div class="compact-label">今日注册</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二行：注册与登录统计（横排） -->
+            <div class="stats-row">
+                <!-- 注册统计 -->
+                <div class="stats-section stats-section-half">
+                    <h3 class="stats-section-title">
+                        <span class="section-icon">📝</span>
+                        注册统计
+                    </h3>
+                    <div class="stats-grid-login">
+                        <div class="login-card login-today">
+                            <div class="login-icon">📅</div>
+                            <div class="login-value">{{ stats.today_registrations }}</div>
+                            <div class="login-label">今日</div>
+                        </div>
+                        <div class="login-card login-week">
+                            <div class="login-icon">📆</div>
+                            <div class="login-value">{{ stats.weekly_registrations }}</div>
+                            <div class="login-label">本周</div>
+                        </div>
+                        <div class="login-card login-month">
+                            <div class="login-icon">🗓️</div>
+                            <div class="login-value">{{ stats.monthly_registrations }}</div>
+                            <div class="login-label">本月</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 登录统计 -->
+                <div class="stats-section stats-section-half">
+                    <h3 class="stats-section-title">
+                        <span class="section-icon">🔐</span>
+                        登录统计
+                    </h3>
+                    <div class="stats-grid-login">
+                        <div class="login-card login-today">
+                            <div class="login-icon">📅</div>
+                            <div class="login-value">{{ stats.today_logins }}</div>
+                            <div class="login-label">今日</div>
+                        </div>
+                        <div class="login-card login-week">
+                            <div class="login-icon">📆</div>
+                            <div class="login-value">{{ stats.weekly_logins }}</div>
+                            <div class="login-label">本周</div>
+                        </div>
+                        <div class="login-card login-month">
+                            <div class="login-icon">🗓️</div>
+                            <div class="login-value">{{ stats.monthly_logins }}</div>
+                            <div class="login-label">本月</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分组1: 数据管理 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon" style="background: rgba(88, 166, 255, 0.15); color: var(--neon-blue);">📊</div>
+                <h2 class="section-title">数据管理</h2>
+            </div>
+            <div class="menu-grid">
+                <a href="/xwx422/update" class="menu-card">
+                    <div class="menu-icon">🔄</div>
+                    <div class="menu-content">
+                        <h3>更新数据</h3>
+                        <p>触发期货品种数据分析，查看更新日志和进度</p>
+                    </div>
+                </a>
+                <a href="/xwx422/analysis" class="menu-card">
+                    <div class="menu-icon">📈</div>
+                    <div class="menu-content">
+                        <h3>数据统计</h3>
+                        <p>查看品种更新趋势、胜率分布、板块统计和活跃度分析</p>
+                    </div>
+                </a>
+                <a href="/xwx422/data_view" class="menu-card">
+                    <div class="menu-icon">🔍</div>
+                    <div class="menu-content">
+                        <h3>数据查看</h3>
+                        <p>浏览数据库中所有期货数据，支持分页和分组筛选</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 分组2: 日志管理 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon" style="background: rgba(63, 185, 80, 0.15); color: var(--neon-green);">📋</div>
+                <h2 class="section-title">日志管理</h2>
+            </div>
+            <div class="menu-grid">
+                <a href="/xwx422/logs/login" class="menu-card">
+                    <div class="menu-icon">🔐</div>
+                    <div class="menu-content">
+                        <h3>登录日志</h3>
+                        <p>查看所有用户的登录记录、IP地址和登录状态</p>
+                    </div>
+                </a>
+                <a href="/xwx422/logs/variety_views" class="menu-card">
+                    <div class="menu-icon">👁️</div>
+                    <div class="menu-content">
+                        <h3>期货查看日志</h3>
+                        <p>查看会员查看期货品种的记录和行为轨迹</p>
+                    </div>
+                </a>
+                <a href="/xwx422/logs/update" class="menu-card">
+                    <div class="menu-icon">📈</div>
+                    <div class="menu-content">
+                        <h3>期货更新日志</h3>
+                        <p>查看数据更新历史、成功率和执行详情</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 分组3: 系统配置 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon" style="background: rgba(163, 113, 247, 0.15); color: var(--neon-purple);">⚙️</div>
+                <h2 class="section-title">系统配置</h2>
+            </div>
+            <div class="menu-grid">
+                <a href="/xwx422/task-health" class="menu-card">
+                    <div class="menu-icon">💓</div>
+                    <div class="menu-content">
+                        <h3>任务健康监控</h3>
+                        <p>监控 Celery 任务状态、分析流水线和基差数据更新</p>
+                    </div>
+                </a>
+                <a href="/xwx422/members" class="menu-card">
+                    <div class="menu-icon">👥</div>
+                    <div class="menu-content">
+                        <h3>用户管理</h3>
+                        <p>创建、编辑、禁用用户账号，重置密码</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

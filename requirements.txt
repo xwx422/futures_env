@@ -1,0 +1,27 @@
+tqsdk
+flask
+flask-login
+flask-caching
+redis
+celery
+eventlet
+pandas
+numpy
+requests
+jieba
+pyyaml
+python-dotenv
+influxdb-client
+clickhouse-driver
+sqlalchemy
+psycopg2-binary
+flower
+
+# P2 爬虫依赖
+akshare>=1.18.0
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+
+# P3 机器学习依赖
+scikit-learn>=1.2.0
+joblib>=1.2.0

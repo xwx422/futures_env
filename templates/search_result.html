@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ variety.variety_name }} 搜索预览 - AI期货分析助手</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg-card: #121212;
+            --bg-elevated: #1a1a1a;
+            --border: rgba(255,255,255,0.08);
+            --text: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --accent: #22d3ee;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 72px;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .logo-text { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            list-style: none;
+        }
+        .nav-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: var(--text); }
+        .nav-cta { display: flex; align-items: center; gap: 12px; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: #fff;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4); }
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+        .mobile-toggle span {
+            width: 24px; height: 2px;
+            background: var(--text);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .nav-menu { display: none; }
+            .mobile-toggle { display: flex; }
+        }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        .page-container { max-width: 800px; margin: 0 auto; padding: 104px 24px 32px; }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .header-row {
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+        }
+        .title-group { flex: 1; }
+        .title-group h1 { font-size: 1.5rem; margin-bottom: 4px; }
+        .code { color: var(--text-muted); font-size: 0.875rem; }
+        .price-group { text-align: right; }
+        .price { font-size: 1.75rem; font-weight: 700; }
+        .change { font-size: 0.875rem; margin-top: 2px; }
+        .change.up { color: var(--danger); }
+        .change.down { color: var(--success); }
+        .tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag {
+            font-size: 0.75rem; padding: 4px 10px; border-radius: 20px;
+            background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--border);
+        }
+        .tag-primary { background: rgba(99,102,241,0.12); color: var(--primary-light); border-color: rgba(99,102,241,0.25); }
+        .tag-success { background: rgba(16,185,129,0.12); color: var(--success); border-color: rgba(16,185,129,0.25); }
+        .tag-warning { background: rgba(245,158,11,0.12); color: var(--warning); border-color: rgba(245,158,11,0.25); }
+        .section-title { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .summary { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
+        .metrics {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 8px;
+        }
+        .metric {
+            background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+        }
+        .metric-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+        .metric-value { font-size: 1rem; font-weight: 600; }
+        .cta {
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(34,211,238,0.08));
+            border: 1px dashed rgba(99,102,241,0.35);
+            text-align: center;
+        }
+        .cta h3 { font-size: 1.1rem; margin-bottom: 8px; }
+        .cta p { color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 16px; }
+        .btn-sm {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 20px; border-radius: 10px; font-size: 0.875rem; font-weight: 600;
+            text-decoration: none; border: none; cursor: pointer;
+        }
+        .btn-sm-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+        }
+        .btn-sm-secondary {
+            background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--border); margin-left: 8px;
+        }
+        .footer-note {
+            text-align: center; color: var(--text-muted); font-size: 0.75rem; margin-top: 8px;
+        }
+        @media (max-width: 640px) {
+            .header-row { flex-direction: column; }
+            .price-group { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon">📊</div>
+                <span class="logo-text">AI期货分析助手</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">首页</a></li>
+                <li><a href="/pricing" class="nav-link">定价</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a href="/login" class="btn btn-primary">立即登录</a>
+                <div class="mobile-toggle" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <!-- 品种概览 -->
+        <div class="card">
+            <div class="header-row">
+                <div class="title-group">
+                    <h1>{{ variety.variety_name }}</h1>
+                    <div class="code">{{ variety.variety_code }} · 最新分析时间 {{ variety.run_time[:16] if variety.run_time else '-' }}</div>
+                    <div class="tags">
+                        <span class="tag tag-primary">方向: {{ variety.trade_direction or '观望' }}</span>
+                        <span class="tag tag-success">技术趋势: {{ variety.tech_trend or '整理' }}</span>
+                        {% if variety.composite_score %}
+                        <span class="tag tag-warning">综合评分: {{ variety.composite_score }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="price-group">
+                    <div class="price">{{ "%.2f"|format(variety.price) if variety.price else '-' }}</div>
+                    {% set change = variety.price_change or 0 %}
+                    <div class="change {% if change > 0 %}up{% elif change < 0 %}down{% endif %}">
+                        {{ "+%.2f"|format(change) if change > 0 else "%.2f"|format(change) }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI 核心观点 -->
+        <div class="card">
+            <div class="section-title">AI 核心观点</div>
+            <p class="summary">
+                {% if variety.reason_full %}
+                    {{ variety.reason_full[:260] }}{% if variety.reason_full|length > 260 %}…{% endif %}
+                {% else %}
+                    暂无文字摘要，登录后可查看完整 AI 研判报告。
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- 关键指标 -->
+        <div class="card">
+            <div class="section-title">关键指标</div>
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-label">建议入场</div>
+                    <div class="metric-value">{{ "%.0f"|format(variety.entry_price) if variety.entry_price else '-' }}</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">目标位</div>
+                    <div class="metric-value">{{ "%.0f"|format(variety.target_price) if variety.target_price else '-' }}</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">止损位</div>
+                    <div class="metric-value">{{ "%.0f"|format(variety.stop_loss) if variety.stop_loss else '-' }}</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">资金胜率</div>
+                    <div class="metric-value">{{ "%.0f"|format(variety.fund_probability) + '%' if variety.fund_probability else '-' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="card cta">
+            <h3>🔒 登录解锁完整分析</h3>
+            <p>查看深度 AI 研报、海龟信号、五周期复合共振、AI+海龟共振、动态风控、主力资金监控、压力支撑与换月预警等核心能力。</p>
+            <div>
+                <a href="/login" class="btn-sm btn-sm-primary">立即登录 →</a>
+                <a href="/pricing" class="btn-sm btn-sm-secondary">查看定价</a>
+            </div>
+        </div>
+
+        <p class="footer-note">
+            登录后可查看完整 AI 深度研报、海龟信号与动态风控建议
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,2803 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI期货分析助手</title>
+    <link href="/static/fonts/inter.css" rel="stylesheet">
+    <!-- 实时价格样式 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/price_realtime.css') }}">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0d1117;
+            --bg-card: #161b22;
+            --bg-elevated: #21262d;
+            --bg-hover: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --neon-blue: #58a6ff;
+            --neon-green: #3fb950;
+            --neon-red: #f85149;
+            --neon-yellow: #d29922;
+            --neon-purple: #a371f7;
+            --neon-cyan: #39c5cf;
+            --border-color: #30363d;
+            --border-hover: #484f58;
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        /* 导航栏 */
+        .navbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.4));
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: var(--neon-blue);
+        }
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .logout-btn:hover {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+        .user-menu {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.375rem 0.75rem;
+            background: linear-gradient(145deg, var(--bg-elevated), rgba(88, 166, 255, 0.05));
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .username {
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 0.25rem 0;
+        }
+        .user-info-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border-color);
+            margin: 0 0.25rem;
+        }
+        .menu-btn {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .menu-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+        .menu-btn.admin-btn {
+            background: rgba(163, 113, 247, 0.15);
+            border-color: rgba(163, 113, 247, 0.3);
+            color: var(--neon-purple);
+        }
+        .menu-btn.admin-btn:hover {
+            background: rgba(163, 113, 247, 0.25);
+        }
+        /* 主容器 */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        /* 头部 */
+        .header {
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .update-info {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        /* 操作栏 */
+        .actions-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-blue), #1f6feb);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+        }
+        .btn-secondary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-hover);
+        }
+        /* ========== 涨跌排行榜样式 - 紧凑行内式 ========== */
+        .price-stats-inline {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin: 1rem 0;
+            font-size: 0.8125rem;
+        }
+        .stats-inline-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .stats-label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .stats-inline-item.gainers .stats-label {
+            color: #ef4444;
+        }
+        .stats-inline-item.losers .stats-label {
+            color: #22c55e;
+        }
+        .stats-inline-item.active .stats-label {
+            color: var(--neon-cyan);
+        }
+        .stats-list {
+            display: flex;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .stats-list span {
+            padding: 0.25rem 0.5rem;
+            background: rgba(139, 148, 158, 0.1);
+            border-radius: 4px;
+            white-space: nowrap;
+            transition: all 0.2s;
+            cursor: help;
+        }
+        .stats-list span:hover {
+            background: rgba(139, 148, 158, 0.15);
+        }
+        .stats-change {
+            font-weight: 600;
+            margin-left: 2px;
+        }
+        .stats-change.up {
+            color: #ef4444;
+        }
+        .stats-change.down {
+            color: #22c55e;
+        }
+        .stats-volume {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
+        .stats-inline-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border-color);
+        }
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .price-stats-inline {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+            .stats-inline-divider {
+                display: none;
+            }
+            .stats-inline-item {
+                width: calc(50% - 0.375rem);
+            }
+        }
+        @media (max-width: 640px) {
+            .price-stats-inline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .stats-inline-item {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .stats-inline-divider {
+                display: none;
+            }
+        }
+        /* ========== 响应式布局 ========== */
+        @media (max-width: 1024px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .price-stats-inline {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .stats-inline-item {
+                width: calc(50% - 0.375rem);
+            }
+
+            .stats-inline-divider {
+                display: none;
+            }
+
+            .actions-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.5rem 0.75rem;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .logo {
+                font-size: 1rem;
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 0.25rem;
+            }
+
+            .logo-icon {
+                font-size: 1.25rem;
+            }
+
+            .user-menu {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .user-info {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .username {
+                font-size: 0.8rem;
+            }
+            .user-info-divider {
+                height: 16px;
+            }
+
+            .menu-btn, .logout-btn {
+                padding: 0.25rem 0.75rem;
+                font-size: 0.75rem;
+            }
+
+            .container {
+                padding: 0.5rem;
+            }
+
+            .header {
+                margin-bottom: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .update-info {
+                font-size: 0.75rem;
+            }
+
+            .price-stats-inline {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .stats-inline-item {
+                width: 100%;
+            }
+
+            .actions-bar {
+                margin-bottom: 1rem;
+            }
+
+            .direction-tag {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.4rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.5rem;
+            }
+
+            .logo {
+                font-size: 0.9rem;
+                gap: 0.375rem;
+            }
+
+            .logo-icon {
+                font-size: 1.125rem;
+            }
+
+            .user-menu {
+                gap: 0.25rem;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .menu-btn, .logout-btn {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.7rem;
+            }
+
+            .container {
+                padding: 0.25rem;
+            }
+
+            .header h1 {
+                font-size: 1rem;
+            }
+
+            .price-stats-inline {
+                padding: 0.5rem;
+            }
+
+            .stats-label {
+                font-size: 0.7rem;
+            }
+
+            .stats-list span {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.3rem;
+            }
+        }
+
+        @media print {
+            .navbar, .actions-bar, .price-stats-inline {
+                display: none;
+            }
+
+            .table-panel {
+                overflow: visible;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+        }
+
+        /* ========== Dashboard 主布局 ========== */
+        .dashboard-main {
+            gap: 1.5rem;
+            margin-top:0rem;
+            align-items: start;
+             margin-left:2rem;
+              margin-right:2rem;
+        }
+
+        /* ========== 表格区域 ========== */
+        .table-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        @media (max-width: 1200px) {
+            .table-panel {
+                max-height: none;
+            }
+        }
+
+        /* ========== 简化表格样式 ========== */
+        .variety-table-simple {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8125rem;
+        }
+        .variety-table-simple thead {
+            background: var(--bg-elevated);
+        }
+        .variety-table-simple th {
+            padding: 0.625rem 0.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.68rem;
+            letter-spacing: 0.03em;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid rgba(48,54,61,0.5);
+        }
+        .variety-table-simple th:last-child { border-right: none; }
+        /* 分组列竖分隔线 */
+        .variety-table-simple th.col-grp-start { border-left: 2px solid var(--border-hover); }
+        .variety-table-simple td {
+            padding: 0.55rem 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid rgba(48,54,61,0.25);
+            vertical-align: middle;
+        }
+        .variety-table-simple td:last-child { border-right: none; }
+        .variety-table-simple td.col-grp-start { border-left: 2px solid rgba(48,54,61,0.4); }
+        .variety-table-simple tbody tr:hover {
+            background: var(--bg-hover);
+            cursor: pointer;
+        }
+        .variety-table-simple tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .variety-table-simple th.col-center,
+        .variety-table-simple td.col-center { text-align: center; }
+        .variety-table-simple th.col-right,
+        .variety-table-simple td.col-right { text-align: right; }
+
+        .rank-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+        .rank-num.top3 {
+            background: linear-gradient(135deg, rgba(210, 153, 34, 0.2), rgba(210, 153, 34, 0.1));
+            color: var(--neon-yellow);
+        }
+
+        .direction-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .direction-tag.long {
+            background: rgba(248, 81, 73, 0.12);
+            color: #ff7b72;
+        }
+        .direction-tag.short {
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--neon-green);
+        }
+        .direction-tag.neutral {
+            background: rgba(139, 148, 158, 0.12);
+            color: var(--text-secondary);
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tier-badge.deploy {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .tier-badge.watch {
+            background: rgba(59, 130, 246, 0.12);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+        }
+        .tier-badge.wait {
+            background: rgba(107, 114, 128, 0.08);
+            color: #6b7280;
+            border: 1px solid rgba(107, 114, 128, 0.15);
+        }
+
+        .variety-row { cursor: pointer; transition: background 0.15s; }
+        .variety-row:hover { background: var(--bg-hover); }
+        .variety-row.tier-row-布局 { border-left: 3px solid #10b981; }
+        .variety-row.tier-row-关注 { border-left: 3px solid #3b82f6; }
+        .variety-row.tier-row-等待 { border-left: 3px solid transparent; }
+        .tier-row-布局 { border-left: 3px solid #10b981 !important; }
+        .tier-row-关注 { border-left: 3px solid #3b82f6 !important; }
+        .tier-row-等待 { border-left: 3px solid transparent !important; }
+
+        .empty-state-small {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .risk-notice {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            background: rgba(248, 81, 73, 0.06);
+            border: 1px solid rgba(248, 81, 73, 0.15);
+            border-radius: var(--radius-sm);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .risk-notice strong {
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        .signal-bars {
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .signal-bar {
+            width: 3px;
+            height: 10px;
+            background: var(--bg-elevated);
+            border-radius: 1px;
+        }
+
+        .signal-bar.active { background: var(--neon-blue); }
+        .signal-bar.active.up { background: var(--neon-red); }
+        .signal-bar.active.down { background: var(--neon-green); }
+        .signal-bar.active.neutral { background: var(--text-muted); }
+
+        .time-dots {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .time-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+        }
+
+        .time-dot.bull { background: var(--neon-red); }
+        .time-dot.bear { background: var(--neon-green); }
+        .time-dot.neutral { background: var(--text-muted); }
+
+        .status-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 12px;
+            background: rgba(139, 148, 158, 0.1);
+            font-weight: 500;
+        }
+        .status-realtime { color: #3fb950; }
+        .status-scheduled { color: #d29922; }
+        .status-updating { color: #3fb950; }
+        .update-status-loading { color: var(--text-muted); }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+        .loading.active {
+            display: block;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--neon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast.success { border-color: var(--neon-green); }
+        .toast.error { border-color: var(--neon-red); }
+
+        .reanalyze-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 14, 26, 0.85);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .reanalyze-overlay.active {
+            display: flex;
+        }
+        .reanalyze-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+        }
+        .reanalyze-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--neon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        .reanalyze-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--neon-blue);
+            margin-bottom: 0.75rem;
+        }
+        .reanalyze-steps {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin: 0 auto;
+            max-width: 260px;
+        }
+        .reanalyze-steps li {
+            padding: 0.4rem 0;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+        .reanalyze-steps li .step-icon {
+            width: 18px;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        .reanalyze-steps li.done {
+            color: var(--neon-green);
+        }
+        .reanalyze-steps li.done .step-icon {
+            color: var(--neon-green);
+        }
+        .reanalyze-steps li.active {
+            color: var(--neon-blue);
+            font-weight: 600;
+        }
+        .reanalyze-steps li.active .step-icon {
+            color: var(--neon-blue);
+            animation: spin 0.8s linear infinite;
+        }
+        .reanalyze-steps li.pending {
+            color: var(--text-muted);
+        }
+
+        .update-status {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            font-size: 0.8125rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 打赏弹窗 -->
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-icon">📊</span>
+            <span class="logo-text">AI期货分析助手</span>
+        </div>
+        <div class="user-menu">
+            {% if session.role == 'admin' %}
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-btn admin-btn">⚙️ 管理后台</a>
+            {% endif %}
+            <button id="refresh-prices-btn" class="menu-btn" style="color: var(--neon-blue); border: 1px solid var(--border-color); padding: 0.4rem 0.75rem; border-radius: var(--radius-md); background: transparent; cursor: pointer; font-size: 0.8rem;">🔄 刷新实时数据</button>
+            <div class="user-info">
+                <!-- 用户名 -->
+                <span class="username">{{ session.username }}</span>
+            </div>
+            <a href="{{ url_for('change_password') }}" class="menu-btn">🔐 修改密码</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">退出</a>
+        </div>
+    </nav>
+    <!-- 主内容 -->
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <p class="update-info">
+                {% if stats %}
+                共 {{ stats.total }} 个品种 |
+                {% endif %}
+                更新时间: {{ latest_update_time if latest_update_time else '暂无数据' }} |
+                <span id="nextUpdateInfo"> 计算中...</span>
+            </p>
+        </div>
+                <!-- 加载状态 -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在执行数据分析，请稍候...</p>
+        </div>
+
+        <!-- 风险提示 -->
+        <div class="risk-notice">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-red); flex-shrink: 0;">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span><strong>风险提示：</strong>本页面数据仅供参考，不构成投资建议。期货交易风险巨大，可能导致本金损失，请独立判断、谨慎决策。<a href="javascript:void(0)" onclick="openTutorialModal()" style="color:var(--neon-blue);margin-left:0.5rem;font-weight:500;text-decoration: none;">📖 使用说明</a></span>
+        </div>
+
+        <!-- 信号追踪统计 -->
+        {% if tracking_stats %}
+        <div style="padding:0.5rem 1rem;margin:0 0 1rem 0;background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:8px;font-size:0.75rem;">
+            <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+                <span style="color:var(--text-secondary);font-weight:600;">📊 历史验证</span>
+                {% if tracking_stats.deploy_total > 0 %}
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                    <span style="color:#10b981;font-weight:700;">🔥布局</span>
+                    <div style="width:80px;height:6px;background:var(--bg-secondary);border-radius:3px;"><div style="width:{{ tracking_stats.deploy_win_rate }}%;height:100%;background:#10b981;border-radius:3px;"></div></div>
+                    <span style="color:#10b981;font-weight:700;">{{ tracking_stats.deploy_win_rate }}%</span>
+                    <span style="color:var(--text-muted);font-size:0.65rem;">{{ tracking_stats.deploy_hit }}/{{ tracking_stats.deploy_total }}次到达目标</span>
+                </div>
+                {% else %}
+                <span style="color:var(--text-muted);font-size:0.65rem;">🔥布局 暂无历史数据</span>
+                {% endif %}
+                {% if tracking_stats.watch_total > 0 %}
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                    <span style="color:#3b82f6;font-weight:700;">👀关注</span>
+                    <div style="width:80px;height:6px;background:var(--bg-secondary);border-radius:3px;"><div style="width:{{ tracking_stats.watch_win_rate }}%;height:100%;background:#3b82f6;border-radius:3px;"></div></div>
+                    <span style="color:#3b82f6;font-weight:700;">{{ tracking_stats.watch_win_rate }}%</span>
+                    <span style="color:var(--text-muted);font-size:0.65rem;">{{ tracking_stats.watch_hit }}/{{ tracking_stats.watch_total }}次到达目标</span>
+                </div>
+                {% else %}
+                <span style="color:var(--text-muted);font-size:0.65rem;">👀关注 暂无历史数据</span>
+                {% endif %}
+                <span style="color:var(--text-muted);font-size:0.6rem;margin-left:auto;">上轮分析 入场→目标/止损 被当前价格触发</span>
+            </div>
+        </div>
+        {% endif %}
+        </div>
+
+        {% if varieties %}
+        <div class="dashboard-main">
+            <div class="main-content">
+                <div class="table-panel">
+                        <table class="variety-table-simple" id="allVarietyTable">
+                             <thead>
+                                 <tr class="group-header">
+                                     <th class="col-center" style="width:36px;">#</th>
+                                     <th>品种</th>
+                                     <th class="col-center col-grp-start" style="background:rgba(96,165,250,0.18);color:#93c5fd;">最新价</th>
+                                     <th class="col-center" style="background:rgba(96,165,250,0.10);color:#a5d0fd;">涨跌</th>
+                                     <th class="col-center col-grp-start" style="background:rgba(167,139,250,0.18);color:#c4b5fd;">信号</th>
+                                     <th class="col-center" style="background:rgba(167,139,250,0.10);color:#d0c4fd;">方向</th>
+                                     <th class="col-center" style="background:rgba(167,139,250,0.10);color:#d0c4fd;">趋势阶段</th>
+                                     <th class="col-center" style="background:rgba(167,139,250,0.10);color:#d0c4fd;">AI判断</th>
+                                     <th class="col-center" style="background:rgba(167,139,250,0.10);color:#d0c4fd;">多周期</th>
+                                     <th class="col-center col-grp-start" style="background:rgba(74,222,128,0.18);color:#86efac;">预判评分</th>
+                                     <th class="col-center" style="background:rgba(74,222,128,0.10);color:#a0f0c0;">趋势空间</th>
+                                     <th class="col-right col-grp-start" style="background:rgba(251,191,36,0.18);color:#fcd34d;">目标</th>
+                                     <th class="col-right" style="background:rgba(251,191,36,0.10);color:#fde68a;">止损</th>
+                                     <th class="col-center" style="background:rgba(251,191,36,0.10);color:#fde68a;">盈亏比</th>
+                                     <th class="col-center" style="width:60px;font-size:0.65rem;">更新时间</th>
+                                     <th class="col-center" style="width:44px;">操作</th>
+                                 </tr>
+                            </thead>
+                            <tbody>
+                                {% for v in varieties | sort(attribute='focus_priority', reverse=true) %}
+                                {% set tier = v.signal_tier or '等待' %}
+                                {% set vdir = v.trade_direction or '观望' %}
+                                {% set pi = v.position_info or {} %}
+                                {% set tp_plan = v.trade_plan or {} %}
+                                {% set outlook = tp_plan.trend_outlook or '' %}
+                                {% set show_phase = v.trend_phase and v.trend_phase != '' %}
+                                <tr class="variety-row tier-row-{{ tier }}" data-name="{{ (v.variety_name ~ ' ' ~ v.variety_code ~ ' ' ~ (v.main_contract_clean or '')) | lower }}" onclick="openDetailModal('{{ v.variety_code }}')">
+                                    <td class="col-center"><span class="rank-num {% if loop.index<=3 %}top3{% endif %}">{{ loop.index }}</span></td>
+                                    <td>
+                                        <div style="font-weight:600;">{{ v.variety_name | replace('GFEX.', '') }}</div>
+                                        <div style="font-size:0.7rem;color:var(--text-muted);font-family:monospace;">{{ (v.main_contract_clean or v.variety_code) | replace('GFEX.', '') }}</div>
+                                    </td>
+                                    <!-- 📊 现状: 最新价 -->
+                                    <td class="col-right col-grp-start" style="font-family:monospace;font-weight:600;" title="当前主力合约最新价格">{{ "%.0f"|format(v.price) if v.price else '—' }}</td>
+                                    <!-- 📊 现状: 涨跌 -->
+                                    <td class="col-center" style="font-size:0.7rem;" title="当日涨跌幅(%）">
+                                        {% set chg = v.price_change or 0 %}
+                                        <span style="color:{% if chg>0 %}var(--neon-red){% elif chg<0 %}var(--neon-green){% else %}var(--text-muted){% endif %};font-weight:600;">
+                                            {{ '%+.2f'|format(chg) if chg else '—' }}
+                                        </span>
+                                    </td>
+                                    <!-- 📈 趋势: 信号 -->
+                                    <td class="col-center col-grp-start" title="综合机会评级：布局→强烈关注，关注→值得关注，等待→建议观望">
+                                        {% if tier == '布局' %}<span class="tier-badge deploy">🔥布局</span>
+                                        {% elif tier == '关注' %}<span class="tier-badge watch">👀关注</span>
+                                        {% else %}<span class="tier-badge wait">⏸等待</span>{% endif %}
+                                    </td>
+                                    <!-- 📈 趋势: 方向 -->
+                                    <td class="col-center" title="AI建议的交易方向">
+                                        {% if vdir == '做多' %}<span class="direction-tag long">⬆ 看多</span>
+                                        {% elif vdir == '做空' %}<span class="direction-tag short">⬇ 看空</span>
+                                        {% elif vdir == '观望' %}<span class="direction-tag neutral">⏸ 观望</span>
+                                        {% else %}<span class="direction-tag neutral">—</span>{% endif %}
+                                    </td>
+                                    <!-- 📈 趋势: 趋势阶段 -->
+                                    <td class="col-center" title="趋势生命周期阶段：初期→刚启动，成长→发展中，成熟→高位，衰竭→接近反转">
+                                        {% if show_phase %}
+                                        {% set tp = v.trend_phase or '' %}
+                                        {% set tpc = {'趋势初期':'#10b981','趋势成长':'#3b82f6','趋势成熟':'#f59e0b','趋势衰竭':'#ef4444'} %}
+                                        <span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:0.65rem;font-weight:600;white-space:nowrap;color:{{ tpc.get(tp,'#6b7280') }};background:{{ tpc.get(tp,'#6b7280') }}12;border:1px solid {{ tpc.get(tp,'#6b7280') }}30;">{{ tp }}</span>
+                                        {% else %}<span style="color:var(--text-muted);font-size:0.75rem;">—</span>{% endif %}
+                                    </td>
+                                    <!-- 📈 趋势: AI判断 -->
+                                    <td class="col-center" title="AI对当前趋势的综合判断描述">
+                                        {% if outlook %}
+                                        {% set oc_map = {'↑趋势延续':'#10b981','↑趋势初期':'#10b981','↑回调待涨':'#3b82f6','→高位震荡':'#f59e0b','→低位筑底':'#8b5cf6','→方向不明':'#6b7280','↓趋势转弱':'#ef4444','↓即将反转':'#dc2626','🔴顶背离风险':'#ef4444','🟢底背离机会':'#10b981'} %}
+                                        {% set oc = oc_map.get(outlook, '#6b7280') %}
+                                        <span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:0.65rem;font-weight:700;white-space:nowrap;color:{{ oc }};background:{{ oc }}12;border:1px solid {{ oc }}40;">{{ outlook }}</span>
+                                        {% else %}<span style="color:var(--text-muted);font-size:0.7rem;">—</span>{% endif %}
+                                    </td>
+                                    <!-- 📈 趋势: 多周期 -->
+                                    <td class="col-center" title="15min/30min/60min/日/周 多周期方向一致性">
+                                        <div class="time-dots">
+                                            {% if v.timeframe_analysis %}
+                                            {% for tf_name, tf_data in v.timeframe_analysis.items() %}
+                                            <div class="time-dot {{ 'bull' if '多' in tf_data.direction else 'bear' if '空' in tf_data.direction else 'neutral' }}"></div>
+                                            {% endfor %}
+                                            {% else %}<div class="time-dot"></div><div class="time-dot"></div><div class="time-dot"></div><div class="time-dot"></div><div class="time-dot"></div>{% endif %}
+                                        </div>
+                                    </td>
+                                    <!-- 🔮 预判: 预判评分 -->
+                                    <td class="col-center col-grp-start" title="趋势预判引擎评分(0-100)：≥70优秀时机，<30建议等待">
+                                        {% set pts = v.pre_trend_score or 0 %}
+                                        {% set ptc = v.pre_trend_color or 'gray' %}
+                                        {% set pcolors = {'green':'#3fb950','blue':'#58a6ff','yellow':'#d29922','red':'#f85149','gray':'#6e7681'} %}
+                                        <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;color:{{ pcolors.get(ptc, '#6e7681') }};background:{{ pcolors.get(ptc, '#6e7681') }}12;border:1px solid {{ pcolors.get(ptc, '#6e7681') }}40;" title="预判评分: {{ pts }}/100 | 评级: {{ v.pre_trend_label or '—' }} | 否决: {{ '是' if v.pre_trend_veto else '否' }}{% if v.pre_trend_veto_reasons %}{% for r in v.pre_trend_veto_reasons %}&#10;{{ r }}{% endfor %}{% endif %}">{% if v.pre_trend_veto %}🔴{% endif %}{{ pts }}</span>
+                                    </td>
+                                    <!-- 🔮 预判: 趋势空间 -->
+                                    <td class="col-center" style="font-size:0.65rem;" title="趋势已消耗/剩余空间(ATR)">
+                                        {% set rm = v.pre_trend_room_desc or '' %}
+                                        {% if rm %}<span style="color:var(--text-secondary);" title="已走{{ v.pre_trend_move_atr }}ATR，剩余{{ v.pre_trend_remaining_atr }}ATR">{{ rm[:16] }}</span>{% else %}<span style="color:var(--text-muted);">—</span>{% endif %}
+                                    </td>
+                                    <!-- ⛔ 风控: 目标 -->
+                                    <td class="col-right col-grp-start" style="font-family:monospace;color:var(--neon-blue);" title="基于支撑阻力位的结构目标价">{{ "%.0f"|format(pi.structure_target) if pi.structure_target else '—' }}</td>
+                                    <!-- ⛔ 风控: 止损 -->
+                                    <td class="col-right" style="font-family:monospace;color:var(--neon-green);" title="建议止损位(ATR动态计算)">{{ "%.0f"|format(pi.stop_loss) if pi.stop_loss else '—' }}</td>
+                                    <!-- ⛔ 风控: 盈亏比 -->
+                                    <td class="col-center" title="风险回报比(≥2:1为佳)">
+                                        {% if pi.risk_reward_ratio %}
+                                        {% set rr = pi.risk_reward_ratio %}
+                                        <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;color:#fff;background:{% if rr>=2 %}#10b981{% elif rr>=1.5 %}#3b82f6{% else %}#f59e0b{% endif %};">1:{{ rr }}</span>
+                                        {% else %}<span style="color:var(--text-muted);">—</span>{% endif %}
+                                    </td>
+                                    <!-- ⚙️ 更新时间 -->
+                                    <td class="col-center" style="font-size:0.6rem;color:var(--text-muted);font-family:monospace;" title="数据生成时间(HH:MM)">{{ v.run_time[11:16] if v.run_time else '—' }}</td>
+                                    <!-- ⚙️ 操作 -->
+                                    <td class="col-center">
+                                        <button onclick="reanalyzeVariety('{{ v.variety_code }}', event)" style="background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.25);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:0.6rem;" title="重新分析">🔄</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
+            <div class="empty-icon" style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+            <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">暂无分析数据</h3>
+            <p style="color: var(--text-muted);">请联系管理员进行后台更新品种最新数据</p>
+        </div>
+        {% endif %}
+
+        <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 重新分析进度遮罩 -->
+    <div class="reanalyze-overlay" id="reanalyzeOverlay">
+        <div class="reanalyze-card">
+            <div class="reanalyze-spinner"></div>
+            <div class="reanalyze-title" id="reanalyzeTitle">正在重新分析</div>
+            <ul class="reanalyze-steps" id="reanalyzeSteps">
+                <li data-step="1"><span class="step-icon">⏳</span> 正在抓取行情数据...</li>
+                <li data-step="2"><span class="step-icon">⚪</span> 正在AI分析数据...</li>
+                <li data-step="3"><span class="step-icon">⚪</span> 正在计算交易策略...</li>
+            </ul>
+        </div>
+    </div>
+
+        <script>
+
+        // 品种库搜索过滤
+        function showTermHelp() {
+            alert("📐 期限结构是什么？\n\n" +
+                "同一期货品种有不同到期月份的合约（比如生猪 2505、2507、2509）。\n\n" +
+                "• 升水：远月比近月贵 → 市场看涨，远期预期强\n" +
+                "• 贴水：远月比近月便宜 → 市场看跌，现货更强\n\n" +
+                "筛选含义：\n" +
+                "• 深贴水：远月大幅低于近月（年化<-5%），现货很强，注意做空机会\n" +
+                "• 高升水：远月大幅高于近月（年化>5%），现货很弱，注意做多机会\n" +
+                "• 结构反转：近3日价差正负号发生变化，趋势可能转折");
+        }
+        function filterVarieties() {
+            const query = document.getElementById('varietySearch').value.trim().toLowerCase();
+            const termFilter = document.getElementById('termStructureFilter').value;
+            const rows = document.querySelectorAll('#allVarietyTable tbody .variety-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const name = row.getAttribute('data-name') || '';
+                const term = row.getAttribute('data-term') || 'all';
+                const matchQuery = name.includes(query);
+                const matchTerm = termFilter === 'all' || term === termFilter || (termFilter === 'reversal' && term !== 'normal');
+                if (matchQuery && matchTerm) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('searchEmpty').style.display = visibleCount === 0 ? 'block' : 'none';
+            document.getElementById('allVarietyTable').style.display = visibleCount === 0 ? 'none' : 'table';
+        }
+        function updateData() {
+            const loading = document.getElementById('loading');
+            loading.classList.add('active');
+
+            fetch('/api/update_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                loading.classList.remove('active');
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    setTimeout(() => location.reload(), 30000);
+                } else {
+                    showToast(data.error || '更新失败', 'error');
+                }
+            })
+            .catch(err => {
+                loading.classList.remove('active');
+                showToast('请求失败: ' + err.message, 'error');
+            });
+        }
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        // 从API获取下次更新时间（考虑节假日）
+        let nextUpdateData = null;
+        let priceRefreshTime = null;
+        window.updatePriceRefreshTime = function(updateTime) {
+            priceRefreshTime = updateTime;
+            if (nextUpdateData) {
+                updateTimer();
+            }
+        };
+
+        async function fetchNextUpdateTime() {
+            try {
+                const response = await fetch('/api/market/next-update');
+                const result = await response.json();
+                if (result.success) {
+                    nextUpdateData = result.data;
+                }
+            } catch (error) {
+                console.error('获取下次更新时间失败:', error);
+            }
+        }
+
+        function formatCountdown(targetTimeStr) {
+            const targetTime = new Date(targetTimeStr);
+            const now = new Date();
+            const diff = targetTime - now;
+
+            if (diff <= 0) {
+                return '即将更新';
+            }
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            if (hours > 0) {
+                return `${hours}小时${minutes}分钟`;
+            } else if (minutes > 0) {
+                return `${minutes}分钟${seconds}秒`;
+            } else {
+                return `${seconds}秒`;
+            }
+        }
+
+        function updateTimer() {
+            const nextUpdateInfo = document.getElementById('nextUpdateInfo');
+            if (!nextUpdateData) {
+                nextUpdateInfo.innerHTML = '<span class="update-status-loading">🔄 加载更新状态...</span>';
+                return;
+            }
+            const currentMarketStatus = window.marketStatus;
+            if (currentMarketStatus && currentMarketStatus.is_trading === false) {
+                const nextUpdateEl = document.getElementById('nextUpdateInfo');
+                if (nextUpdateEl && nextUpdateEl.parentElement) {
+                    nextUpdateEl.parentElement.innerHTML = `
+                        {% if stats %}共 {{ stats.total }} 个品种 |{% endif %}
+                        上次分析：{{ latest_update_time }} |
+                        <span id="nextUpdateInfo">
+                            <span class="status-item status-scheduled">⏰ 下次完整分析：${formatCountdown(nextUpdateData.next_update_time)}后（${nextUpdateData.next_update_desc}）</span>
+                        </span>
+                        <span style="margin-left: 1rem;"></span>
+                        <span class="status-item status-realtime" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">🔴 休市中（${currentMarketStatus.session || '休市'}）- ${currentMarketStatus.next_session || '等待开盘'}</span>
+                    `;
+                }
+                return;
+            }
+            if (nextUpdateData.is_updating) {
+                const nextUpdateEl = document.getElementById('nextUpdateInfo');
+                if (nextUpdateEl && nextUpdateEl.parentElement) {
+                    nextUpdateEl.parentElement.innerHTML = `
+                        {% if stats %}共 {{ stats.total }} 个品种 |{% endif %}
+                        上次分析：{{ latest_update_time }} |
+                        <span id="nextUpdateInfo">
+                            <span class="status-item status-updating">⏳ 正在更新中...</span>
+                        </span>
+                        <span style="margin-left: 1rem;"></span>
+                        <span class="status-item status-realtime">🟢 价格实时更新（${priceRefreshTime || '刚刚'}）</span>
+                    `;
+                }
+            } else {
+                const countdown = formatCountdown(nextUpdateData.next_update_time);
+                const nextUpdateEl = document.getElementById('nextUpdateInfo');
+                if (nextUpdateEl && nextUpdateEl.parentElement) {
+                    nextUpdateEl.parentElement.innerHTML = `
+                        {% if stats %}共 {{ stats.total }} 个品种 |{% endif %}
+                        上次分析：{{ latest_update_time }} |
+                        <span id="nextUpdateInfo">
+                            <span class="status-item status-scheduled">⏰ 下次完整分析：${countdown}后（${nextUpdateData.next_update_desc}）</span>
+                        </span>
+                        <span style="margin-left: 1rem;"></span>
+                        <span class="status-item status-realtime">🟢 价格实时更新（${priceRefreshTime || '刚刚'}）</span>
+                    `;
+                }
+
+                if (countdown === '即将更新' || countdown === '0 秒') {
+                    console.log('[Dashboard] 下次分析时间已到，自动触发更新...');
+                    updateData();
+                }
+            }
+        }
+
+        fetchNextUpdateTime().then(() => {
+            updateTimer();
+            setInterval(updateTimer, 1000);
+            setInterval(fetchNextUpdateTime, 300000);
+        });
+
+        function loadActualWinRates() {
+            const varietyCodes = [{% for v in varieties %}'{{ v.variety_code }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+
+            varietyCodes.forEach(code => {
+                fetch('/api/signal/variety/' + code + '?days=30')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.stats && data.stats.total > 0) {
+                            const actualRateEl = document.getElementById('actual-rate-' + code);
+                            if (actualRateEl) {
+                                actualRateEl.textContent = data.stats.win_rate + '%';
+                            }
+                        }
+                    })
+                    .catch(err => {
+                    });
+            });
+        }
+
+        loadActualWinRates();
+
+        function manualRefreshFocus() { location.reload(); }
+
+        async function reanalyzeVariety(code, e) {
+            if (e) e.stopPropagation();
+
+            // 检查分析次数
+            try {
+                const countResp = await fetch('/api/analysis_count');
+                const countData = await countResp.json();
+
+                if (!countData.success) {
+                    showToast('获取分析次数失败', 'error');
+                    return;
+                }
+
+                // 非管理员需要检查次数
+                if (!countData.is_admin) {
+                    if (countData.count <= 0) {
+                        alert('今日分析次数已用完\n\n如需更多分析，请联系客服申请。');
+                        return;
+                    }
+
+                    // 确认提示
+                    const confirmed = confirm(`每天只有3次免费分析额度\n当前剩余 ${countData.count} 次\n\n确定要执行 ${code} 品种的分析吗？`);
+                    if (!confirmed) return;
+                }
+            } catch (err) {
+                console.error('检查分析次数失败:', err);
+            }
+
+            const overlay = document.getElementById('reanalyzeOverlay');
+            const title = document.getElementById('reanalyzeTitle');
+            const steps = document.querySelectorAll('#reanalyzeSteps li');
+
+            function setStep(n, status) {
+                steps.forEach(s => { s.classList.remove('active', 'done', 'pending'); });
+                for (let i = 0; i < n - 1; i++) {
+                    steps[i].classList.add('done');
+                    steps[i].querySelector('.step-icon').textContent = '✅';
+                    steps[i].querySelector('.step-icon').style.animation = 'none';
+                }
+                const current = steps[n - 1];
+                if (status === 'done') {
+                    current.classList.add('done');
+                    current.querySelector('.step-icon').textContent = '✅';
+                    current.querySelector('.step-icon').style.animation = 'none';
+                } else if (status === 'active') {
+                    current.classList.add('active');
+                    current.querySelector('.step-icon').textContent = '⏳';
+                }
+                for (let i = n; i < steps.length; i++) {
+                    steps[i].classList.add('pending');
+                }
+            }
+
+            overlay.classList.add('active');
+            setStep(1, 'active');
+            title.textContent = '正在重新分析';
+
+            try {
+                await new Promise(r => setTimeout(r, 1000));
+                setStep(1, 'done');
+                setStep(2, 'active');
+                title.textContent = 'AI正在分析中...';
+
+                const resp = await fetch('/api/reanalyze/' + code);
+                const data = await resp.json();
+                if (!data.success) throw new Error(data.error || '提交分析失败');
+
+                setStep(2, 'done');
+                setStep(3, 'active');
+                title.textContent = '计算交易策略...';
+
+                await new Promise(r => setTimeout(r, 1000));
+                setStep(3, 'done');
+                title.textContent = '分析完成，正在刷新...';
+
+                await new Promise(r => setTimeout(r, 800));
+                overlay.classList.remove('active');
+                const base = window.location.href.split('?')[0];
+                window.location.href = base + '?t=' + Date.now();
+            } catch(e) {
+                overlay.classList.remove('active');
+                showToast('分析失败: ' + (e.message || '未知错误'), 'error');
+            }
+        }
+    </script>
+
+
+    <!-- 详情弹窗 -->
+    <div id="detailModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeDetailModal()"></div>
+        <div class="modal-content" style="width: 95%; max-width: 600px; max-height: 85vh; display: flex; flex-direction: column; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border-color); background: var(--bg-elevated); flex-shrink: 0;">
+                <h2 id="modalTitle" style="margin: 0; font-size: 1.125rem; color: var(--text-primary);">品种详情</h2>
+                <button onclick="closeDetailModal()" style="background: transparent; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; padding: 0.25rem; border-radius: 4px; transition: all 0.2s;">
+                    &times;
+                </button>
+            </div>
+            <iframe id="modalFrame" src="about:blank" style="flex: 1; width: 100%; border: none; background: var(--bg-primary); display: block;"></iframe>
+        </div>
+    </div>
+
+    <!-- 使用教程弹窗 -->
+    <div id="guideModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeGuideModal()"></div>
+        <div class="modal-content guide-modal-content" style="width: 95%; max-width: 700px; max-height: 85vh; display: flex; flex-direction: column; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); background: linear-gradient(135deg, var(--bg-elevated), rgba(99, 102, 241, 0.1)); flex-shrink: 0;">
+                <h2 style="margin: 0; font-size: 1.25rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📖</span>
+                    <span>使用教程与帮助</span>
+                </h2>
+                <button onclick="closeGuideModal()" style="background: transparent; border: none; color: var(--text-secondary); font-size: 1.75rem; cursor: pointer; padding: 0.25rem; border-radius: 4px; transition: all 0.2s; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+                    &times;
+                </button>
+            </div>
+            <div class="guide-content" style="flex: 1; overflow-y: auto; padding: 1.5rem; background: var(--bg-primary);">
+                <!-- 导航标签 -->
+                <div class="guide-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+                    <button class="guide-tab active" data-tab="indicators" onclick="switchGuideTab('indicators')" style="padding: 0.5rem 1rem; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;">📊 指标解读</button>
+                    <button class="guide-tab" data-tab="faq" onclick="switchGuideTab('faq')" style="padding: 0.5rem 1rem; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;">❓ 常见问题</button>
+                    <button class="guide-tab" data-tab="signals" onclick="switchGuideTab('signals')" style="padding: 0.5rem 1rem; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;">🎯 信号说明</button>
+                </div>
+                
+                <!-- 功能说明内容 -->
+                <div id="tab-indicators" class="guide-tab-content" style="display: block;">
+                    <div class="guide-section" style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; color: var(--neon-blue); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📌</span>
+                            <span>页面两个 Tab 有什么区别？</span>
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;">
+                            <div style="background: rgba(88, 166, 255, 0.08); border: 1px solid rgba(88, 166, 255, 0.25); border-radius: 10px; padding: 1rem;">
+                                <div style="font-weight: 600; color: var(--neon-blue); margin-bottom: 0.35rem;">📈 今日重点关注</div>
+                                <div>这是系统<strong>自动过滤</strong>出来的当天值得盯的品种，仅展示评级为 <strong>A级（强信号）</strong> 和 <strong>B级（可交易）</strong> 的品种。入选条件：</div>
+                                <ul style="margin: 0.5rem 0 0 0; padding-left: 1.25rem;">
+                                    <li><strong>A级</strong>：ADX≥30 + 资金面≥60 + 多周期共振 + 基差支撑（全维度对齐）</li>
+                                    <li><strong>B级</strong>：ADX≥25 + 资金面≥50，或共振+强趋势等组合条件</li>
+                                    <li>评级为 C/D 的品种不会出现在重点关注中</li>
+                                </ul>
+                                <div style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.8rem;">排名综合考虑评级等级、校准胜率、多周期共振等因素，A级始终排在最前。</div>
+                            </div>
+                            <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 10px; padding: 1rem;">
+                                <div style="font-weight: 600; color: #818cf8; margin-bottom: 0.35rem;">🔍 品种库</div>
+                                <div>全市场扫描结果，展示所有品种的方向、评级、胜率、趋势强度等信息。包含 C/D 级品种，方便你全局观察哪些板块强、哪些板块弱，以及为什么某些品种暂时不适合交易。</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-section" style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; color: var(--neon-green); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🧮</span>
+                            <span>列表里每一列是什么意思？</span>
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.7;">
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid var(--neon-red);">
+                                <strong style="color: var(--text-primary);">方向</strong> — 系统给出的交易方向：⬆ 看多 / ⬇ 看空 / — 观望（D级信号自动降为观望）。
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid #818cf8;">
+                                <strong style="color: var(--text-primary);">AI判断</strong> — <strong>核心决策列</strong>：AI融合技术面+资金面+基差+分歧信号给出的前向走势判断，是列表中最具实战参考价值的列：
+                                <div style="margin-top: 0.35rem; font-size: 0.75rem;">
+                                    <span style="color: #10b981;">↑趋势延续/↑趋势初期</span> 强势看涨<br>
+                                    <span style="color: #3b82f6;">↑回调待涨</span> 趋势向上等待回调入场<br>
+                                    <span style="color: #f59e0b;">→高位震荡/→低位筑底</span> 等待突破<br>
+                                    <span style="color: #ef4444;">↓趋势转弱/↓即将反转</span> 趋势末端信号<br>
+                                    <span style="color: #dc2626;">🔴顶背离风险 / 🟢底背离机会</span> 分歧预警
+                                </div>
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid #10b981;">
+                                <strong style="color: var(--text-primary);">评级</strong> — 信号质量评级（A/B/C/D）：
+                                <div style="margin-top: 0.35rem; font-size: 0.75rem;">
+                                    <span style="padding: 0.1rem 0.4rem; background: rgba(16, 185, 129, 0.2); color: #10b981; border-radius: 3px; font-weight: 600;">A 强信号</span> 全维度对齐，预期胜率 50-58%<br>
+                                    <span style="padding: 0.1rem 0.4rem; background: rgba(99, 102, 241, 0.2); color: #818cf8; border-radius: 3px; font-weight: 600;">B 可交易</span> 核心条件满足，预期胜率 35-45%<br>
+                                    <span style="padding: 0.1rem 0.4rem; background: rgba(245, 158, 11, 0.2); color: #f59e0b; border-radius: 3px; font-weight: 600;">C 弱信号</span> 仅AI独立判断，不建议跟单<br>
+                                    <span style="padding: 0.1rem 0.4rem; background: rgba(107, 114, 128, 0.2); color: #6b7280; border-radius: 3px; font-weight: 600;">D 不建议</span> ADX<20 或基差极端矛盾
+                                </div>
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid #06b6d4;">
+                                <strong style="color: var(--text-primary);">趋势阶段</strong> — 趋势生命周期（仅在有明确方向时显示）：
+                                <span style="color: #10b981;">🟢初期</span> <span style="color: #3b82f6;">🔵成长</span> <span style="color: #f59e0b;">🟡成熟</span> <span style="color: #ef4444;">🔴衰竭</span>
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid var(--neon-purple);">
+                                <strong style="color: var(--text-primary);">趋势强度</strong> — 5格能量条（ADX），格数越多=趋势越明确。
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid var(--neon-green);">
+                                <strong style="color: var(--text-primary);">多周期</strong> — 5个圆点 → 15m/30m/1h/日线/周线。红色=多头，绿色=空头，灰色=震荡。
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid #a371f7;">
+                                <strong style="color: var(--text-primary);">持续概率</strong> — 当前趋势延续的可能性，综合ADX+阶段+共振+RSI计算。
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                <strong style="color: var(--text-primary);">反转条件</strong> — 触发趋势反转的关键价位。做多跌破支撑转空，做空突破阻力转多。
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid var(--neon-blue);">
+                                <strong style="color: var(--text-primary);">目标位</strong> — 基于支撑阻力的结构目标价。做多看下一阻力，做空看下一支撑。
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid var(--neon-yellow);">
+                                <strong style="color: var(--text-primary);">盈亏比</strong> — 目标位÷止损的比值。1:2以上绿色，1:1.5蓝色，低于1.5黄色。
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid #8b5cf6;">
+                                <strong style="color: var(--text-primary);">🟢🔴基差指示</strong> — 品种名前的小圆点：🟢基差支撑方向 | 🔴基差矛盾 | ⚪中性。代表现货与期货的价差是否支持当前交易方向。
+                            </div>
+                        </div>
+                                <strong style="color: var(--text-primary);">趋势</strong> — 5格能量条，基于 ADX 趋势强度。格数越多代表趋势越明确（不是涨得猛，而是方向越确定）。
+                            </div>
+                            <div style="padding: 0.5rem 0.75rem; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid var(--neon-green);">
+                                <strong style="color: var(--text-primary);">多周期</strong> — 5个小圆点，从左到右依次是 <strong>15分钟 / 30分钟 / 1小时 / 日线 / 周线</strong>。红色=多头，绿色=空头，灰色=震荡。颜色越一致，说明大小周期越同向。
+                            </div>
+                        </div>
+
+
+                            <div style="margin-bottom: 0.5rem;">
+                        </div>
+                    </div>
+
+                    <div class="guide-section" style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; color: var(--neon-yellow); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🔥</span>
+                            <span>这些标记是什么意思？</span>
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(248, 81, 73, 0.08); border-radius: 8px;">
+                                <span style="font-size: 1rem;">🔥</span>
+                                <span><strong>多周期共振</strong> — 5 个时间周期方向完全一致（全红或全绿），是系统认定的强共识信号。</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(99, 102, 241, 0.08); border-radius: 8px;">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: #818cf8; border: 1px solid rgba(99,102,241,0.4); padding: 0.1rem 0.35rem; border-radius: 4px;">AI+🐢</span>
+                                <span><strong>AI + 海龟共振</strong> — AI 判断的方向与经典海龟交易法则的突破方向一致，双重确认，参考价值更高。</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(16, 185, 129, 0.08); border-radius: 8px;">
+                                <span style="font-size: 1rem;">📊</span>
+                                <span><strong>基差支撑</strong> — 现货与期货价差方向与交易方向一致。做多时基差升水（现货强于期货），做空时基差贴水（现货弱于期货），说明基本面支撑交易方向。</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(245, 158, 11, 0.08); border-radius: 8px;">
+                                <span style="font-size: 1rem;">⚠️</span>
+                                <span><strong>基差矛盾</strong> — 现货与期货价差方向与交易方向矛盾。做多但现货极弱，或做空但现货极强，基本面不支撑当前方向，信号会被降级或直接标记为D级（不建议交易）。</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-section" style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; color: var(--neon-purple); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📋</span>
+                            <span>详情页怎么看？</span>
+                        </h3>
+                        <div style="background: rgba(163, 113, 247, 0.05); border-left: 3px solid var(--neon-purple); padding: 0.75rem 1rem; border-radius: 0 8px 8px 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;">
+                            <p style="margin: 0 0 0.5rem 0;">点击任意品种名称进入详情页，核心看点：</p>
+                            <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.8rem; line-height: 1.9;">
+                                <li><strong>AI 诊断</strong>：一句话总结当前该品种的趋势状态和操作建议。</li>
+                                <li><strong>技术指标</strong>：MACD、RSI、布林带、KDJ 四大指标的当前状态和信号。</li>
+                                <li><strong>多周期共振</strong>：把 15min/30min/1h/1day/1week 五个周期的方向、强度、RSI 全部摊开，一眼看清大小周期是否同向。</li>
+                                <li><strong>压力支撑</strong>：系统自动算出的阻力位和支撑位，是你设止损、止盈的重要参考。</li>
+                                <li><strong>资金分析</strong>：持仓量变化、资金流向、量价配合度，判断有没有大资金在参与。</li>
+                                <li><strong>海龟交易</strong>：20日/55日高低点、当前是否突破、距离突破还差多少点。</li>
+                                <li><strong>基差分析</strong>：现货价格、基差、基差率、历史分位数，从基本面验证交易方向的合理性。</li>
+                                <li><strong>投资者适当性</strong>：根据波动率和胜率，提示该品种适合新手、进阶还是专业选手。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3 style="font-size: 1rem; color: var(--neon-cyan); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>✅</span>
+                            <span>正确的实战参考方法</span>
+                        </h3>
+                        <div style="background: rgba(34, 211, 238, 0.05); border: 1px solid rgba(34, 211, 238, 0.2); border-radius: 10px; padding: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8;">
+                            <ol style="margin: 0; padding-left: 1.25rem;">
+                                <li><strong>先看"今日重点关注"</strong>：只看 A/B 级品种，这里已经是系统用多维度过滤后的高质量机会。</li>
+                                <li><strong>优先选 A 级 + 基差支撑</strong>：全维度对齐的信号最可靠，基差支撑说明基本面也在配合。</li>
+                                <li><strong>点进去看详情页</strong>：重点看压力支撑位置、海龟突破状态和基差分位数，决定你的入场点和止损点。</li>
+                                <li><strong>关注持仓监控</strong>：系统对 A/B 级品种自动开仓追踪，评级降为 C/D 时自动平仓，帮你守住纪律。</li>
+                                <li><strong>控制仓位</strong>：波动率大的品种，建议手数会自动减少，不要逆势加仓。</li>
+                                <li><strong>没有机会就等</strong>：如果"今日重点关注"是空的，说明市场当前缺乏高质量信号，空仓观望本身就是最好的操作。</li>
+                            </ol>
+                            <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: rgba(248, 81, 73, 0.08); border-radius: 6px; color: var(--neon-red); font-size: 0.8rem;">
+                                <strong>风险提示：</strong>系统所有信号均基于历史数据和技术模型自动生成，仅供客观参考，不构成投资建议。期货交易风险极高，请独立判断、严格控制风险。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 常见问题内容 -->
+                <div id="tab-faq" class="guide-tab-content" style="display: none;">
+                    <div class="faq-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="faq-item" style="background: var(--bg-elevated); border-radius: 10px; padding: 1rem; border: 1px solid var(--border-color);">
+                            <h4 style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--neon-blue);">Q:</span>
+                                <span>数据多久更新一次？</span>
+                            </h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; padding-left: 1.25rem;">
+                                系统每日<strong>早上8:00-9:00</strong>自动更新全品种分析数据，覆盖 50 个主流期货品种。更新内容包括 5 周期技术分析、持仓量分析、AI 评分、海龟信号等。您可以在页面顶部查看"最新更新时间"。
+                            </p>
+                        </div>
+
+                        <div class="faq-item" style="background: var(--bg-elevated); border-radius: 10px; padding: 1rem; border: 1px solid var(--border-color);">
+                            <h4 style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--neon-blue);">Q:</span>
+                                <span>胜率是怎么算出来的？</span>
+                            </h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; padding-left: 1.25rem;">
+                                系统采用<strong>四层概率融合</strong>计算最终胜率：① AI 原始概率（基于技术面+资金面+趋势强度）→ ② 历史回测验证 → ③ 实盘信号校准 → ④ ML 模型预测。四层按权重融合后输出"校准胜率"，比单一指标更可靠。同时，系统还通过<strong>信号评级（A/B/C/D）</strong>对信号质量做分层，A级信号（全维度对齐+基差支撑）的预期胜率最高。
+                            </p>
+                        </div>
+
+                        <div class="faq-item" style="background: var(--bg-elevated); border-radius: 10px; padding: 1rem; border: 1px solid var(--border-color);">
+                            <h4 style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--neon-blue);">Q:</span>
+                                <span>多周期圆点从左到右代表什么？</span>
+                            </h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; padding-left: 1.25rem;">
+                                5 个圆点从左到右依次是：<strong>15分钟 → 30分钟 → 1小时 → 日线 → 周线</strong>。<strong style="color: var(--neon-red);">红色</strong> = 该周期看多，<strong style="color: var(--neon-green);">绿色</strong> = 该周期看空，<strong style="color: var(--text-muted);">灰色</strong> = 震荡/观望。5 个颜色完全一致时，名称旁会出现 🔥，表示多周期共振。
+                            </p>
+                        </div>
+
+                        <div class="faq-item" style="background: var(--bg-elevated); border-radius: 10px; padding: 1rem; border: 1px solid var(--border-color);">
+                            <h4 style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--neon-blue);">Q:</span>
+                                <span>为什么"今日重点关注"有时候是空的？</span>
+                            </h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; padding-left: 1.25rem;">
+                                这不是 bug，而是系统在告诉你：当前市场上<strong>没有品种达到 A/B 级标准</strong>。重点关注仅展示经过技术面（海龟+ADX）、资金面（量价配合）、多周期共振、基本面（基差验证）多维度筛选后的高质量信号。期货市场不是每天都有好机会，强行出手反而容易亏钱。当重点关注为空时，建议你观望或去"品种库"看看 C/D 级品种为什么不达标，等待下一轮明确信号。
+                            </p>
+                        </div>
+
+                        <div class="faq-item" style="background: var(--bg-elevated); border-radius: 10px; padding: 1rem; border: 1px solid var(--border-color);">
+                            <h4 style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--neon-blue);">Q:</span>
+                                <span>系统能保证盈利吗？</span>
+                            </h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; padding-left: 1.25rem;">
+                                <strong>不能。</strong>任何分析工具都无法保证盈利。本系统提供的是基于数据分析的客观参考，帮助您提高决策效率和风险控制能力。期货交易风险极高，请根据自身情况独立判断，严格控制风险。
+                            </p>
+                        </div>
+
+                        <div class="faq-item" style="background: var(--bg-elevated); border-radius: 10px; padding: 1rem; border: 1px solid var(--border-color);">
+                            <h4 style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--neon-blue);">Q:</span>
+                                <span>遇到技术问题怎么办？</span>
+                            </h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; padding-left: 1.25rem;">
+                                您可以通过以下方式获取帮助：1) 扫码添加专属客服微信；2) 点击顶部导航的"意见反馈"提交问题；3) 发送邮件至客服邮箱。我们会在24小时内响应。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 信号说明内容 -->
+                <div id="tab-signals" class="guide-tab-content" style="display: none;">
+                    <div class="guide-section" style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; color: var(--neon-cyan); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🎯</span>
+                            <span>信号评级体系（A/B/C/D）</span>
+                        </h3>
+                        <div style="background: rgba(34, 211, 238, 0.05); border: 1px solid rgba(34, 211, 238, 0.2); border-radius: 10px; padding: 1rem;">
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.7;">
+                                <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px;">
+                                    <div style="font-weight: 700; color: #10b981; margin-bottom: 0.35rem; font-size: 0.9rem;">🟢 A级 · 强信号（预期胜率 50-58%）</div>
+                                    <div>条件：<strong>AI+海龟共振 + ADX≥30 + 资金面≥60 + 多周期共振 + 基差支撑</strong></div>
+                                    <div style="margin-top: 0.25rem; color: var(--text-muted); font-size: 0.75rem;">全维度对齐：技术面、资金面、多周期、基本面（基差）全部指向同一方向。这是系统认定的最高质量信号。</div>
+                                </div>
+                                <div style="padding: 0.75rem; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 8px;">
+                                    <div style="font-weight: 700; color: #818cf8; margin-bottom: 0.35rem; font-size: 0.9rem;">🔵 B级 · 可交易（预期胜率 35-45%）</div>
+                                    <div>满足以下任一条件：</div>
+                                    <ul style="margin: 0.25rem 0 0 0; padding-left: 1.25rem;">
+                                        <li>AI+海龟共振 + ADX≥25</li>
+                                        <li>多周期共振 + ADX≥30 + 资金面≥60</li>
+                                        <li>海龟确认方向一致 + ADX≥30</li>
+                                        <li>A级核心条件满足但<strong>基差矛盾</strong>（降级为B）</li>
+                                    </ul>
+                                </div>
+                                <div style="padding: 0.75rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px;">
+                                    <div style="font-weight: 700; color: #f59e0b; margin-bottom: 0.35rem; font-size: 0.9rem;">🟡 C级 · 弱信号（预期胜率 25-35%）</div>
+                                    <div>仅 AI 独立判断，海龟无确认，亦不满足 B 级独立条件。不建议直接跟单，可作为观察参考。</div>
+                                </div>
+                                <div style="padding: 0.75rem; background: rgba(107, 114, 128, 0.08); border: 1px solid rgba(107, 114, 128, 0.25); border-radius: 8px;">
+                                    <div style="font-weight: 700; color: #6b7280; margin-bottom: 0.35rem; font-size: 0.9rem;">⚫ D级 · 不建议交易</div>
+                                    <div>以下情况均标记为 D 级：</div>
+                                    <ul style="margin: 0.25rem 0 0 0; padding-left: 1.25rem;">
+                                        <li>ADX < 20（趋势不明显，震荡市）</li>
+                                        <li>方向为观望</li>
+                                        <li>AI 与海龟方向矛盾</li>
+                                        <li>基差极端矛盾（做多但现货极弱 / 做空但现货极强）</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-section" style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; color: var(--neon-green); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📊</span>
+                            <span>基差/现货验证是什么？</span>
+                        </h3>
+                        <div style="background: rgba(63, 185, 80, 0.05); border: 1px solid rgba(63, 185, 80, 0.2); border-radius: 10px; padding: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;">
+                            <p style="margin: 0 0 0.5rem 0;">基差 = 现货价格 - 期货价格，是<strong>基本面验证技术面</strong>的关键维度：</p>
+                            <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.8rem; line-height: 1.9;">
+                                <li><strong>基差升水（现货 > 期货）</strong>：现货市场强势，支撑做多观点</li>
+                                <li><strong>基差贴水（现货 < 期货）</strong>：现货市场偏弱，支撑做空观点</li>
+                                <li><strong>基差分位 > 60% + 做多</strong>：基差支撑，评级可能提升</li>
+                                <li><strong>基差分位 < 40% + 做空</strong>：基差支撑，评级可能提升</li>
+                                <li><strong>基差分位 < 15% + 做多</strong>：极端矛盾，直接降为D级</li>
+                                <li><strong>基差分位 > 85% + 做空</strong>：极端矛盾，直接降为D级</li>
+                            </ul>
+                            <div style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.75rem;">数据来源：AKShare 每日更新的现货价格，系统自动计算基差分位数。</div>
+                        </div>
+                    </div>
+
+                    <div class="guide-section" style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; color: var(--neon-orange); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🔄</span>
+                            <span>持仓监控与自动平仓</span>
+                        </h3>
+                        <div style="background: rgba(240, 136, 62, 0.05); border: 1px solid rgba(240, 136, 62, 0.2); border-radius: 10px; padding: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;">
+                            <p style="margin: 0 0 0.5rem 0;">系统对 A/B 级品种<strong>自动开仓追踪</strong>，形成完整的信号生命周期：</p>
+                            <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.8rem; line-height: 1.9;">
+                                <li><strong>自动开仓</strong>：品种进入重点关注（A/B级）时，系统自动记录开仓信号</li>
+                                <li><strong>自动平仓</strong>：以下情况触发自动平仓：
+                                    <ul style="margin: 0.25rem 0 0 0; padding-left: 1rem;">
+                                        <li>评级降为 C/D 级（不再满足重点关注条件）</li>
+                                        <li>方向变为观望</li>
+                                        <li>触发止损或止盈条件</li>
+                                        <li>基差变为极端矛盾</li>
+                                    </ul>
+                                </li>
+                                <li><strong>持仓监控</strong>：Dashboard 右侧显示当前 A/B 级品种的模拟持仓和盈亏追踪</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3 style="font-size: 1rem; color: var(--neon-purple); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>⚠️</span>
+                            <span>什么情况下系统会显示"观望"？</span>
+                        </h3>
+                        <div style="background: rgba(163, 113, 247, 0.05); border: 1px solid rgba(163, 113, 247, 0.2); border-radius: 10px; padding: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;">
+                            <p style="margin: 0 0 0.5rem 0;">系统对"观望"非常严格，以下情况都会被强制过滤：</p>
+                            <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.8rem; line-height: 1.9;">
+                                <li><strong>与周线/日线大趋势冲突</strong>：小周期想逆势操作，直接过滤</li>
+                                <li><strong>RSI 极端超买/超卖</strong>：追高风险太大，系统禁止追高/追空</li>
+                                <li><strong>疑似假突破</strong>：价格突破后快速收回，系统会要求等待确认</li>
+                                <li><strong>波动率极高</strong>（ATR > 3.5%）：行情太疯，建议先观望</li>
+                                <li><strong>多周期严重分歧</strong>：大小周期互掐，方向不明</li>
+                                <li><strong>基差极端矛盾</strong>：做多但现货极弱，或做空但现货极强</li>
+                                <li><strong>ADX < 20</strong>：市场无明确趋势，震荡为主</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>            </div>
+        </div>
+    </div>
+
+    <style>
+        /* 弹窗样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal .modal-content {
+            position: relative;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            width: 90%;
+            max-width: 1400px;
+            height: 90vh;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal .modal-body-content {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 弹窗内详情页面样式优化 */
+        .modal .detail-page-wrapper {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .modal .detail-page-wrapper * {
+            box-sizing: border-box;
+        }
+
+        .modal .detail-page-wrapper .navbar {
+            display: none !important;
+        }
+
+        .modal .detail-page-wrapper .container {
+            max-width: 100%;
+            padding: 0.5rem;
+            margin: 0;
+        }
+
+        .modal .detail-page-wrapper .header-card {
+            margin-bottom: 0.75rem !important;
+            padding: 0.75rem 1rem !important;
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: var(--radius-lg) !important;
+        }
+
+        .modal .detail-page-wrapper .header-title h1 {
+            font-size: 1.1rem !important;
+            margin-bottom: 0.375rem !important;
+            font-weight: 600 !important;
+        }
+
+        .modal .detail-page-wrapper .header-meta {
+            font-size: 0.7rem !important;
+            color: var(--text-muted) !important;
+        }
+
+        .modal .detail-page-wrapper .direction-tags {
+            margin-top: 0.5rem !important;
+            display: flex !important;
+            gap: 0.5rem !important;
+            flex-wrap: wrap !important;
+        }
+
+        .modal .detail-page-wrapper .direction-tag {
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.5rem !important;
+            border-radius: 4px !important;
+            font-weight: 600 !important;
+        }
+
+        .modal .detail-page-wrapper .probability-display {
+            min-width: 80px !important;
+            padding: 0.5rem !important;
+            background: var(--bg-elevated) !important;
+            border-radius: var(--radius-md) !important;
+            text-align: center !important;
+        }
+
+        .modal .detail-page-wrapper .probability-value {
+            font-size: 1.25rem !important;
+            font-weight: 700 !important;
+        }
+
+        .modal .detail-page-wrapper .probability-label {
+            font-size: 0.65rem !important;
+            color: var(--text-muted) !important;
+        }
+
+        .modal .detail-page-wrapper .section-header {
+            margin: 0.75rem 0 0.5rem !important;
+            padding: 0.375rem 0 !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        .modal .detail-page-wrapper .section-icon {
+            font-size: 0.9rem !important;
+            margin-right: 0.375rem !important;
+        }
+
+        .modal .detail-page-wrapper .section-title {
+            font-size: 0.9rem !important;
+            font-weight: 600 !important;
+            color: var(--text-primary) !important;
+        }
+
+        .modal .detail-page-wrapper .detail-card {
+            padding: 0.75rem !important;
+            margin-bottom: 0.5rem !important;
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: var(--radius-md) !important;
+        }
+
+        .modal .detail-page-wrapper .card-title {
+            font-size: 0.85rem !important;
+            margin-bottom: 0.5rem !important;
+            padding-bottom: 0.375rem !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            font-weight: 600 !important;
+            color: var(--neon-blue) !important;
+        }
+
+        .modal .detail-page-wrapper .info-list {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.375rem !important;
+        }
+
+        .modal .detail-page-wrapper .info-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 0.375rem 0 !important;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.3) !important;
+        }
+
+        .modal .detail-page-wrapper .info-row:last-child {
+            border-bottom: none !important;
+        }
+
+        .modal .detail-page-wrapper .info-label {
+            font-size: 0.7rem !important;
+            color: var(--text-secondary) !important;
+            font-weight: 500 !important;
+        }
+
+        .modal .detail-page-wrapper .info-value {
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            text-align: right !important;
+        }
+
+        .modal .detail-page-wrapper .data-item {
+            padding: 0.5rem !important;
+            background: var(--bg-elevated) !important;
+            border-radius: var(--radius-md) !important;
+            text-align: center !important;
+        }
+
+        .modal .detail-page-wrapper .data-label {
+            font-size: 0.65rem !important;
+            color: var(--text-muted) !important;
+            margin-bottom: 0.25rem !important;
+            text-transform: uppercase !important;
+        }
+
+        .modal .detail-page-wrapper .data-value {
+            font-size: 0.85rem !important;
+            font-weight: 700 !important;
+        }
+
+        .modal .detail-page-wrapper .timeframe-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+
+        .modal .detail-page-wrapper .timeframe-name {
+            font-size: 0.6rem !important;
+        }
+
+        .modal .detail-page-wrapper .timeframe-direction {
+            font-size: 0.75rem !important;
+        }
+
+        .modal .detail-page-wrapper .grid-row {
+            gap: 0.5rem !important;
+        }
+
+        .modal .detail-page-wrapper .grid-3 {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+
+        .modal .detail-page-wrapper .grid-2 {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+
+        .modal .detail-page-wrapper .alert-box {
+            padding: 0.5rem 0.75rem !important;
+            margin-bottom: 0.5rem !important;
+            border-radius: var(--radius-md) !important;
+        }
+
+        .modal .detail-page-wrapper .alert-title {
+            font-size: 0.8rem !important;
+            margin-bottom: 0.375rem !important;
+            font-weight: 600 !important;
+        }
+
+        .modal .detail-page-wrapper .alert-box > div:last-child {
+            font-size: 0.7rem !important;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .modal .modal-content {
+                width: 95%;
+                max-height: 95vh;
+            }
+
+            .modal .detail-page-wrapper .grid-3 {
+                grid-template-columns: 1fr !important;
+            }
+
+            .modal .detail-page-wrapper .timeframe-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+    
+        /* ========== 详情页面样式 ========== */
+        .modal .detail-page-wrapper .header-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .modal .detail-page-wrapper .header-card {
+            margin-bottom: 1rem;
+            padding: 1rem;
+        }
+        .modal .detail-page-wrapper .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        .modal .detail-page-wrapper .header-top {
+            flex-direction: column;
+                gap: 1rem;
+        }
+        .modal .detail-page-wrapper .header-meta {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .modal .detail-page-wrapper .header-meta {
+            font-size: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .direction-tags {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .modal .detail-page-wrapper .direction-tags {
+            margin-top: 0.5rem !important;
+            gap: 0.5rem !important;
+        }
+        .modal .detail-page-wrapper .direction-tag {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .modal .detail-page-wrapper .direction-tag {
+            font-size: 0.75rem !important;
+            padding: 0.25rem 0.6rem !important;
+        }
+        .modal .detail-page-wrapper .direction-tag.long {
+            background: rgba(248, 81, 73, 0.15);
+            color: var(--neon-red);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+        }
+        .modal .detail-page-wrapper .direction-tag.short {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--neon-green);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+        }
+        .modal .detail-page-wrapper .direction-tag.neutral {
+            background: rgba(139, 148, 158, 0.2);
+            color: var(--text-secondary);
+            border: 1px solid rgba(139, 148, 158, 0.3);
+        }
+        .modal .detail-page-wrapper .probability-display {
+            text-align: center;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            min-width: 140px;
+        }
+        .modal .detail-page-wrapper .probability-display {
+            width: 100%;
+        }
+        .modal .detail-page-wrapper .probability-display {
+            min-width: 100px !important;
+            padding: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .probability-display {
+            min-width: 80px !important;
+        }
+        .modal .detail-page-wrapper .probability-value {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        .modal .detail-page-wrapper .probability-value {
+            color: var(--neon-green);
+        }
+        .modal .detail-page-wrapper .probability-value {
+            color: var(--neon-yellow);
+        }
+        .modal .detail-page-wrapper .probability-value {
+            color: var(--neon-red);
+        }
+        .modal .detail-page-wrapper .probability-value {
+            font-size: 1.5rem !important;
+        }
+        .modal .detail-page-wrapper .probability-value {
+            font-size: 1.25rem !important;
+        }
+        .modal .detail-page-wrapper .probability-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        .modal .detail-page-wrapper .probability-label {
+            font-size: 0.7rem !important;
+        }
+        .modal .detail-page-wrapper .section-header {
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .modal .detail-page-wrapper .section-header {
+            margin: 1rem 0 0.75rem !important;
+            padding: 0.5rem 0 !important;
+        }
+        .modal .detail-page-wrapper .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .modal .detail-page-wrapper .section-title {
+            font-size: 1rem !important;
+        }
+        .modal .detail-page-wrapper .section-icon {
+            font-size: 1.25rem;
+        }
+        .modal .detail-page-wrapper .section-icon {
+            font-size: 1rem !important;
+        }
+        .modal .detail-page-wrapper .grid-row {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .modal .detail-page-wrapper .grid-row {
+            display: grid;
+                gap: 1rem;
+        }
+        .modal .detail-page-wrapper .grid-row {
+            gap: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .modal .detail-page-wrapper .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+        .modal .detail-page-wrapper .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .modal .detail-page-wrapper .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .modal .detail-page-wrapper .grid-3 {
+            grid-template-columns: 1fr;
+        }
+        .modal .detail-page-wrapper .grid-3 {
+            grid-template-columns: 1fr !important;
+        }
+        .modal .detail-page-wrapper .detail-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal .detail-page-wrapper .detail-card {
+            background: var(--bg-card) !important;
+                border: 1px solid var(--border-color) !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+        }
+        .modal .detail-page-wrapper .detail-card {
+            padding: 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .modal .detail-page-wrapper .card-title {
+            font-size: 0.9rem !important;
+            margin-bottom: 0.75rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+        .modal .detail-page-wrapper .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .modal .detail-page-wrapper .info-list {
+            gap: 0.5rem !important;
+        }
+        .modal .detail-page-wrapper .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.625rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .modal .detail-page-wrapper .info-row {
+            padding: 0.4rem 0 !important;
+            font-size: 0.8rem !important;
+        }
+        .modal .detail-page-wrapper .info-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        .modal .detail-page-wrapper .info-label {
+            font-size: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .info-value {
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-align: right;
+        }
+        .modal .detail-page-wrapper .info-value {
+            font-size: 0.8rem !important;
+        }
+        .modal .detail-page-wrapper .data-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal .detail-page-wrapper .data-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .modal .detail-page-wrapper .data-grid-3 {
+            grid-template-columns: 1fr;
+        }
+        .modal .detail-page-wrapper .data-grid-3 {
+            gap: 0.5rem !important;
+        }
+        .modal .detail-page-wrapper .data-item {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            padding: 1rem 0.75rem;
+            text-align: center;
+        }
+        .modal .detail-page-wrapper .data-item {
+            padding: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .data-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .modal .detail-page-wrapper .data-label {
+            font-size: 0.7rem !important;
+        }
+        .modal .detail-page-wrapper .data-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        .modal .detail-page-wrapper .data-value {
+            font-size: 0.9rem !important;
+        }
+        .modal .detail-page-wrapper .timeframe-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+        .modal .detail-page-wrapper .timeframe-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .modal .detail-page-wrapper .timeframe-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .modal .detail-page-wrapper .timeframe-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+        .modal .detail-page-wrapper .timeframe-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        .modal .detail-page-wrapper .timeframe-item {
+            padding: 0.5rem !important;
+        }
+        .modal .detail-page-wrapper .timeframe-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .modal .detail-page-wrapper .timeframe-name {
+            font-size: 0.6rem !important;
+        }
+        .modal .detail-page-wrapper .timeframe-direction {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .modal .detail-page-wrapper .timeframe-direction {
+            font-size: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .timeframe-trend {
+            font-size: 0.6rem !important;
+        }
+        .modal .detail-page-wrapper .timeframe-rsi {
+            font-size: 0.6rem !important;
+        }
+        .modal .detail-page-wrapper .price-zones {
+            margin-bottom: 1rem;
+        }
+        .modal .detail-page-wrapper .price-zones {
+            padding: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .price-zone {
+            margin-bottom: 0.75rem;
+        }
+        .modal .detail-page-wrapper .price-zone {
+            margin-bottom: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .price-zone-title {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        .modal .detail-page-wrapper .price-zone-title {
+            font-size: 0.8rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        .modal .detail-page-wrapper .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.375rem 0;
+            font-size: 0.875rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .modal .detail-page-wrapper .price-item {
+            padding: 0.4rem 0.6rem !important;
+            font-size: 0.8rem !important;
+        }
+        .modal .detail-page-wrapper .metric-grid {
+            gap: 0.5rem !important;
+        }
+        .modal .detail-page-wrapper .metric-item {
+            padding: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .metric-label {
+            font-size: 0.7rem !important;
+        }
+        .modal .detail-page-wrapper .metric-value {
+            font-size: 0.9rem !important;
+        }
+        .modal .detail-page-wrapper .progress-container {
+            margin-top: 0.5rem;
+        }
+        .modal .detail-page-wrapper .progress-container {
+            padding: 0.5rem 0 !important;
+        }
+        .modal .detail-page-wrapper .progress-bar {
+            height: 8px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .modal .detail-page-wrapper .progress-bar {
+            height: 6px !important;
+        }
+        .modal .detail-page-wrapper .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .modal .detail-page-wrapper .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        .modal .detail-page-wrapper .progress-labels {
+            font-size: 0.65rem !important;
+            margin-top: 0.25rem !important;
+        }
+        .modal .detail-page-wrapper .conclusion-text {
+            font-size: 0.8rem !important;
+            line-height: 1.5 !important;
+        }
+        .modal .detail-page-wrapper .alert-box {
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .modal .detail-page-wrapper .alert-box {
+            padding: 0.75rem 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        .modal .detail-page-wrapper .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .modal .detail-page-wrapper .alert-title {
+            font-size: 0.85rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+</style>
+
+    <script>
+        // 打开使用教程弹窗
+        function openGuideModal() {
+            const modal = document.getElementById('guideModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭使用教程弹窗
+        function closeGuideModal() {
+            const modal = document.getElementById('guideModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // 打开使用说明弹窗
+        function openTutorialModal() {
+            document.getElementById('tutorialModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭使用说明弹窗
+        function closeTutorialModal() {
+            document.getElementById('tutorialModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // 切换使用教程标签
+        function switchGuideTab(tabName) {
+            // 隐藏所有内容
+            document.querySelectorAll('.guide-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            // 显示选中的内容
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            
+            // 更新标签样式
+            document.querySelectorAll('.guide-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.background = 'transparent';
+                tab.style.borderColor = 'var(--border-color)';
+                tab.style.color = 'var(--text-secondary)';
+            });
+            
+            // 高亮当前标签
+            const activeTab = document.querySelector('.guide-tab[data-tab="' + tabName + '"');
+            if (activeTab) {
+                activeTab.classList.add('active');
+                activeTab.style.background = 'rgba(99, 102, 241, 0.2)';
+                activeTab.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+                activeTab.style.color = '#818cf8';
+            }
+        }
+
+        // 打开详情弹窗
+        function openDetailModal(varietyCode) {
+            const modal = document.getElementById('detailModal');
+            const modalFrame = document.getElementById('modalFrame');
+            const modalTitle = document.getElementById('modalTitle');
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            modalTitle.textContent = '加载中...';
+            modalFrame.style.height = '400px'; // 初始高度
+
+            // 使用 iframe 加载详情页面
+            modalFrame.src = '/variety/' + varietyCode;
+            
+            // iframe 加载完成后更新标题并调整高度
+            modalFrame.onload = function() {
+                try {
+                    const frameDoc = modalFrame.contentDocument || modalFrame.contentWindow.document;
+                    const title = frameDoc.querySelector('.header-title');
+                    if (title) {
+                        modalTitle.textContent = title.textContent.trim();
+                    }
+                    // 设置 iframe 高度为内容高度
+                    const contentHeight = frameDoc.body.scrollHeight + 20; // 加一些边距
+                    const maxHeight = window.innerHeight * 0.85 - 60; // 减去弹窗头部
+                    modalFrame.style.height = Math.min(contentHeight, maxHeight) + "px";
+                } catch(e) {
+                    // 跨域时忽略
+                    modalFrame.style.height = '500px';
+                }
+            };
+        }
+
+        // 关闭详情弹窗
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            const modalFrame = document.getElementById('modalFrame');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            modalFrame.src = 'about:blank'; // 清空iframe
+        }
+
+        // ESC 键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDetailModal();
+                closeGuideModal();
+            }
+        });
+    </script>
+
+
+    <!-- 自动刷新脚本 -->
+    <script>
+    (function() {
+        let autoRefreshTimer = null;
+        let countdownTimer = null;
+        let remainingSeconds = 0;
+        let isPaused = false;
+        let cachedVarieties = null;
+
+        // 格式化倒计时
+        function formatCountdown(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }
+
+        // 获取信号来源标签
+        function getSignalSourceTag(source) {
+            if (source === 'AI+TURTLE') return '<span class="signal-tag">AI+🐢</span>';
+            if (source === 'TURTLE') return '<span class="signal-tag turtle">🐢 海龟</span>';
+            return '<span class="signal-tag" style="background:rgba(139,148,158,0.1);color:var(--text-muted);">AI</span>';
+        }
+
+        // 获取方向标签
+        function getDirectionTag(dir) {
+            if (dir === '做多') return '<span class="direction-tag long">⬆ 看多</span>';
+            if (dir === '做空') return '<span class="direction-tag short">⬇ 看空</span>';
+            return '<span class="direction-tag neutral">— 观望</span>';
+        }
+
+        // 获取涨跌颜色
+        function getChangeColor(change) {
+            if (change > 0) return 'var(--neon-red)';
+            if (change < 0) return 'var(--neon-green)';
+            return 'var(--text-secondary)';
+        }
+
+        // 构建趋势条
+        function buildSignalBars(trendInfo) {
+            const score = (trendInfo && trendInfo.trend_score) || 0;
+            const active = Math.floor(score / 20);
+            const dir = (trendInfo && trendInfo.direction) || '';
+            const dtype = dir.includes('多') ? 'up' : dir.includes('空') ? 'down' : 'neutral';
+            let html = '<div class="signal-bars" title="趋势强度: ' + score + '/100">';
+            for (let i = 0; i < 5; i++) {
+                html += '<div class="signal-bar' + (i < active ? ' active ' + dtype : '') + '"></div>';
+            }
+            return html + '</div>';
+        }
+
+        // 构建多周期点
+        function buildTimeDots(tfAnalysis) {
+            if (!tfAnalysis) {
+                return '<div class="time-dot"></div>'.repeat(5);
+            }
+            let html = '';
+            for (const [, tfData] of Object.entries(tfAnalysis)) {
+                const d = tfData.direction || '';
+                const cls = d.includes('多') ? 'bull' : d.includes('空') ? 'bear' : 'neutral';
+                html += '<div class="time-dot ' + cls + '"></div>';
+            }
+            return html || '<div class="time-dot"></div>'.repeat(5);
+        }
+
+        // 渲染重点关注表格
+    function renderFocusTable(varieties) {
+            const focus = varieties
+                .filter(v => v.signal_rating && (v.signal_rating.rating === 'A' || v.signal_rating.rating === 'B'))
+                .sort((a, b) => (b.focus_priority || 0) - (a.focus_priority || 0))
+                .slice(0, 10);
+
+            const tbody = document.getElementById('focusTableBody');
+            if (!tbody) return;
+
+            if (focus.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="14" class="empty-state-small">今日暂无可交易品种</td></tr>';
+                return;
+            }
+
+            const ratingColors = {A:'#10b981', B:'#3b82f6', C:'#f59e0b', D:'#6b7280'};
+            let html = '';
+            focus.forEach((v, idx) => {
+                const sr = v.signal_rating || {rating:'D', est_win_rate:0};
+                const rc = ratingColors[sr.rating] || '#6b7280';
+                const dir = v.trade_direction || '观望';
+                const showPhase = dir !== '观望' && sr.rating !== 'D';
+                const price = v.price ? Math.round(v.price) : '-';
+                const pi = v.position_info || {};
+                const rr = pi.risk_reward_ratio || 0;
+                const rrBg = rr >= 2 ? '#10b981' : (rr >= 1.5 ? '#3b82f6' : '#f59e0b');
+                const rrText = rr ? '1:' + rr : '—';
+                const hasResonance = (v.timeframe_confluence || '').includes('共振');
+                const name = (v.variety_name || '').replace('GFEX.', '');
+                const contract = (v.main_contract_clean || v.variety_code || '').replace('GFEX.', '');
+                const sector = (!v.sector || v.sector === '未知') ? '其他' : v.sector;
+
+                const tPhase = v.trend_phase || '';
+                const tpColorMap = {'趋势初期':'#10b981','趋势成长':'#3b82f6','趋势成熟':'#f59e0b','趋势衰竭':'#ef4444'};
+                const tpC = tpColorMap[tPhase] || '#6b7280';
+                const tpTag = (showPhase && tPhase) ? '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:600;white-space:nowrap;color:'+tpC+';background:'+tpC+'15;border:1px solid '+tpC+'40;">'+tPhase+'</span>' : '<span style="color:var(--text-muted);font-size:0.75rem;">\u2014</span>';
+
+                const bars = buildSignalBars(v.trend_info);
+                const dots = buildTimeDots(v.timeframe_analysis);
+
+                const cProb = v.continuation_prob || 0;
+                const cpColor = cProb >= 65 ? '#10b981' : cProb >= 50 ? '#3b82f6' : cProb >= 30 ? '#f59e0b' : '#ef4444';
+                const cpTag = cProb > 0 ? '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;color:'+cpColor+';background:'+cpColor+'12;border:1px solid '+cpColor+'40;">'+cProb+'%</span>' : '<span style="color:var(--text-muted);font-size:0.75rem;">\u2014</span>';
+
+                const sTarget = pi.structure_target || 0;
+                const sTargetText = sTarget ? Math.round(sTarget) : '\u2014';
+
+                const revCond = pi.reversal_condition || '';
+                const rcTag = revCond ? '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.65rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#f59e0b;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);">'+revCond+'</span>' : '<span style="color:var(--text-muted);font-size:0.75rem;">\u2014</span>';
+
+                const tp = v.trade_plan || {};
+                const outlook = tp.trend_outlook || '';
+                const outlookColors = {'\u2191趋势延续':'#10b981','\u2191趋势初期':'#10b981','\u2191回调待涨':'#3b82f6','\u2192高位震荡':'#f59e0b','\u2192低位筑底':'#8b5cf6','\u2192方向不明':'#6b7280','\u2193趋势转弱':'#ef4444','\u2193即将反转':'#dc2626','\uD83D\uDD34顶背离风险':'#ef4444','\uD83D\uDFE2底背离机会':'#10b981'};
+                const oC = outlookColors[outlook] || '#6b7280';
+                const outlookTag = outlook ? '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;white-space:nowrap;color:'+oC+';background:'+oC+'12;border:1px solid '+oC+'40;">'+outlook+'</span>' : '<span style="color:#ef4444;font-size:0.65rem;font-weight:600;" title="AI\u672A\u8FD4\u56DE\u5224\u65AD\uFF0C\u9700\u91CD\u65B0\u5206\u6790">\u26A0 \u672A\u5206\u6790</span>';
+
+                const bd = v.basis_data || {};
+                const bp = bd.basis_percentile;
+                const basisDot = bp !== undefined ? (bp > 60 ? '\uD83D\uDFE2' : bp < 40 ? '\uD83D\uDD34' : '\u26AA') : '';
+
+                const entryPrice = pi.entry_price || '—';
+                const stopLossVal = pi.stop_loss || 0;
+                const tTitle = (dir !== '观望' && stopLossVal) ? '入场' + entryPrice + ' | 止损' + stopLossVal + ' | 目标' + (sTarget || '—') + (revCond ? ' | ' + revCond : '') + ' | 周期' + (v.trade_cycle || '中线') : '';
+
+                html += '<tr onclick="openDetailModal(\'' + v.variety_code + '\')" title="' + tTitle + '">';
+                html += '<td class="col-center"><span class="rank-num' + (idx < 3 ? ' top3' : '') + '">' + (idx + 1) + '</span></td>';
+                html += '<td><div style="font-weight:600;display:flex;align-items:center;gap:0.35rem;">';
+                if (basisDot) html += '<span title="\u57FA\u5DEE\u5206\u4F4D">'+basisDot+'</span>';
+                html += name;
+                if (hasResonance) html += '<span title="\u591A\u5468\u671F\u5171\u632F" style="font-size:0.75rem;line-height:1;">\uD83D\uDD25</span>';
+                html += '</div><div style="font-size:0.7rem;color:var(--text-muted);font-family:monospace;display:flex;align-items:center;gap:0.35rem;">' + contract;
+                html += '<span class="sector-tag" data-sector="' + sector + '">' + sector.slice(0, 2) + '</span></div></td>';
+                html += '<td class="col-center">' + getDirectionTag(dir) + '</td>';
+                html += '<td class="col-center">' + outlookTag + '</td>';
+                html += '<td class="col-center"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;color:#fff;background:' + rc + ';" title="\u4FE1\u53F7\u8BC4\u7EA7\uFF1A' + sr.rating + '\u7EA7 | \u9884\u4F30\u80DC\u7387' + (sr.est_win_rate || 0) + '% | \u5E02\u573A\u5F3A\u5EA6' + (v.fund_probability || 0) + '%">' + sr.rating + '</span></td>';
+                html += '<td class="col-center">' + tpTag + '</td>';
+                html += '<td class="col-center">' + bars + '</td>';
+                html += '<td class="col-center">' + dots + '</td>';
+                html += '<td class="col-center">' + cpTag + '</td>';
+                html += '<td class="col-center" style="max-width:110px;">' + rcTag + '</td>';
+                html += '<td class="col-right" style="font-family:monospace;font-weight:600;">' + price + '</td>';
+                html += '<td class="col-right" style="font-family:monospace;color:var(--neon-blue);">' + sTargetText + '</td>';
+                html += '<td class="col-right" style="font-family:monospace;color:var(--neon-green);">' + (pi.stop_loss ? Math.round(pi.stop_loss) : '\u2014') + '</td>';
+                html += '<td class="col-center"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:700;color:#fff;background:' + rrBg + ';" title="\u76C8\u4E8F\u6BD4: ' + rrText + '">' + rrText + '</span></td>';
+                html += '</tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        // 获取数据并更新
+        async function fetchAndUpdate() {
+            try {
+                const resp = await fetch('/api/varieties');
+                if (!resp.ok) return;
+                const data = await resp.json();
+                if (data.success && data.data) {
+                    cachedVarieties = data.data;
+                    renderFocusTable(data.data);
+                    document.getElementById('refreshStatus').textContent = '⏱ 上次更新: ' + new Date().toLocaleTimeString();
+                }
+            } catch (e) {
+                document.getElementById('refreshStatus').textContent = '⚠️ 刷新失败';
+            }
+        }
+
+        // 手动刷新
+        window.manualRefreshFocus = function() {
+            fetchAndUpdate();
+            resetAutoRefresh();
+        };
+
+        // 开始倒计时
+        function startCountdown() {
+            if (countdownTimer) clearInterval(countdownTimer);
+            const select = document.getElementById('refreshInterval');
+            if (!select) return;
+            remainingSeconds = parseInt(select.value);
+            updateCountdownDisplay();
+            countdownTimer = setInterval(() => {
+                if (isPaused) return;
+                remainingSeconds--;
+                updateCountdownDisplay();
+                if (remainingSeconds <= 0) {
+                    fetchAndUpdate();
+                    remainingSeconds = parseInt(select.value);
+                }
+            }, 1000);
+        }
+
+        function updateCountdownDisplay() {
+            const el = document.getElementById('refreshCountdown');
+            if (el) el.textContent = formatCountdown(remainingSeconds);
+        }
+
+        // 暂停/恢复
+        window.toggleAutoRefresh = function() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('autoRefreshToggle');
+            const status = document.getElementById('refreshStatus');
+            if (!btn && !status) return;
+            if (isPaused) {
+                if (btn) { btn.textContent = '恢复'; btn.style.background = 'rgba(245,158,11,0.15)'; btn.style.color = '#f59e0b'; btn.style.borderColor = 'rgba(245,158,11,0.3)'; }
+                if (status) status.textContent = '⏸ 自动刷新已暂停';
+            } else {
+                if (btn) { btn.textContent = '暂停'; btn.style.background = 'rgba(16,185,129,0.15)'; btn.style.color = '#10b981'; btn.style.borderColor = 'rgba(16,185,129,0.3)'; }
+                if (status) status.textContent = '⏱ 自动刷新已开启';
+            }
+        };
+
+        // 重置刷新间隔
+        window.resetAutoRefresh = function() {
+            startCountdown();
+        };
+
+        // 页面可见性切换时暂停/恢复
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (countdownTimer) clearInterval(countdownTimer);
+            } else {
+                startCountdown();
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            startCountdown();
+        });
+    })();
+    </script>
+
+    <!-- 实时价格脚本 -->
+    <script src="{{ url_for('static', filename='js/price_realtime.js') }}"></script>
+    
+    <!-- 使用说明弹窗 -->
+    <div id="tutorialModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeTutorialModal()"></div>
+        <div class="modal-content" style="width: 95%; max-width: 650px; max-height: 85vh; display: flex; flex-direction: column; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); background: linear-gradient(135deg, var(--bg-elevated), rgba(88, 166, 255, 0.1)); flex-shrink: 0;">
+                <h2 style="margin: 0; font-size: 1.125rem; color: var(--text-primary);">📖 使用说明 · 快速入门</h2>
+                <button onclick="closeTutorialModal()" style="background: transparent; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; padding: 0.25rem; border-radius: 4px;">&times;</button>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding: 1.5rem; font-size: 0.85rem; line-height: 1.8; color: var(--text-secondary);">
+                <p style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem;">👋 欢迎使用 AI期货分析助手</p>
+                <p>本系统每日自动分析覆盖主流期货品种，以下是快速上手步骤：</p>
+
+                <div style="background: var(--bg-elevated); border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                    <p style="font-weight: 600; color: var(--neon-blue); margin-bottom: 0.5rem;">📊 第一步：看懂历史验证</p>
+                    <p>页面顶部有"<strong style="color:#10b981;">🔥布局</strong>"和"<strong style="color:#3b82f6;">👀关注</strong>"两组统计数据：</p>
+                    <ul style="padding-left: 1.25rem; margin: 0.5rem 0;">
+                        <li><strong>胜率</strong>：历史信号中价格到达目标位的比例</li>
+                        <li><strong>到达次数</strong>：X/Y 表示 Y 次信号中 X 次成功到达目标</li>
+                        <li>胜率越高说明系统信号越可靠，优先参考高胜率信号</li>
+                    </ul>
+                </div>
+
+                <div style="background: var(--bg-elevated); border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                    <p style="font-weight: 600; color: var(--neon-blue); margin-bottom: 0.5rem;">📋 第二步：读懂品种表格</p>
+                    <p>表格从左到右各列含义：</p>
+                    <ul style="padding-left: 1.25rem; margin: 0.5rem 0;">
+                        <li><strong>信号</strong>：🔥布局(强) &gt; 👀关注(中) &gt; ⏸等待(弱)，优先看布局级别</li>
+                        <li><strong>方向</strong>：⬆看多 / ⬇看空，决定做多还是做空</li>
+                        <li><strong>AI判断</strong>：AI 对趋势的综合判断，如"↑趋势延续"或"🔴顶背离风险"</li>
+                        <li><strong>趋势阶段</strong>：趋势初期→成长→成熟→衰竭，初期最佳</li>
+                        <li><strong>趋势强度</strong>：5格能量条，格子越多趋势越强</li>
+                        <li><strong>多周期</strong>：5个彩点，🟢多 🔴空 ⚪中性，颜色越一致共振越强</li>
+                        <li><strong>持续</strong>：AI 预测趋势延续的概率，越高越好</li>
+                        <li><strong>反转条件</strong>：触发此条件时趋势可能反转，是风控关键</li>
+                        <li><strong>最新价</strong>：当前最新成交价</li>
+                        <li><strong>目标位/止损</strong>：系统给出的理想止盈止损参考位</li>
+                        <li><strong>盈亏比</strong>：目标利润÷止损风险，&ge;2 为优秀</li>
+                    </ul>
+                </div>
+
+                <div style="background: var(--bg-elevated); border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                    <p style="font-weight: 600; color: var(--neon-blue); margin-bottom: 0.5rem;">🎯 第三步：正确使用系统</p>
+                    <ul style="padding-left: 1.25rem; margin: 0.5rem 0;">
+                        <li><strong>优先高胜率品种</strong>：历史验证胜率 &ge; 60% 的品种优先看</li>
+                        <li><strong>信号 + 方向 + 盈亏比</strong>：三者都理想时才考虑交易</li>
+                        <li><strong>多周期共振</strong>：5 个周期方向一致时信号最强</li>
+                        <li><strong>点击品种查看详情</strong>：包含完整的技术面、资金面、基差分析</li>
+                        <li><strong>概率思维</strong>：没有 100% 的信号，做好仓位管理和止损</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(210, 153, 34, 0.08); border: 1px solid rgba(210, 153, 34, 0.2); border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                    <p style="font-weight: 600; color: var(--neon-yellow); margin-bottom: 0.5rem;">⚠️ 重要提醒</p>
+                    <ul style="padding-left: 1.25rem; margin: 0.5rem 0;">
+                        <li>本系统所有信号均为<strong>概率参考</strong>，非确定性预测</li>
+                        <li>请结合自身风险承受能力独立决策</li>
+                        <li>严格控制仓位，单品种不超过总资金 20%</li>
+                        <li>止损是纪律，到达止损位无条件离场</li>
+                    </ul>
+                </div>
+
+                <div style="background: var(--bg-elevated); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; text-align: center;">
+                    <p style="font-weight: 600; color: var(--neon-blue); margin-bottom: 1rem;">💬 联系作者</p>
+                    <p style="margin-bottom: 1rem; font-size: 0.8rem;">如有问题或建议，欢迎扫码联系</p>
+                    <img src="/static/images/code.jpg" alt="作者二维码" style="max-width: 180px; border-radius: 8px; border: 1px solid var(--border-color);">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 51.la 网站统计 -->
+    <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
+    <script>LA.init({id:"3OeoY59Q6yVEiioM",ck:"3OeoY59Q6yVEiioM"})</script>
+</body>
+</html>

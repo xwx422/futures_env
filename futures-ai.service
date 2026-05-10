@@ -1,0 +1,18 @@
+[Unit]
+Description=Gunicorn instance to serve futures-ai
+After=network.target
+
+[Service]
+User=root
+Group=root
+Type=simple
+WorkingDirectory=/var/www/futures_ai
+ExecStart=/var/www/futures_ai/start_gunicorn.sh
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=futures-ai-gunicorn
+
+[Install]
+WantedBy=multi-user.target
